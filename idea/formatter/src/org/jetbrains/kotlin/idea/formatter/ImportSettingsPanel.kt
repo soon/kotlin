@@ -19,7 +19,6 @@ package org.jetbrains.kotlin.idea.formatter
 import com.intellij.application.options.CodeStyleAbstractPanel
 import com.intellij.application.options.ImportLayoutPanel
 import com.intellij.application.options.PackagePanel
-import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.application.ApplicationBundle
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.psi.codeStyle.CodeStyleSettings
