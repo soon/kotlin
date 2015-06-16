@@ -1,9 +1,9 @@
 fun test() {
     class A {
-        <!COMPANION_OBJECT_NOT_ALLOWED!>companion<!> object {}
+        <!WRONG_MODIFIER_PARENT!>companion<!> object {}
     }
 
     object {
-        <!COMPANION_OBJECT_NOT_ALLOWED!>companion<!> object {}
+        <!WRONG_MODIFIER_PARENT!>companion<!> object {}
     }
 }
