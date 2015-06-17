@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.descriptors.ClassDescriptor;
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor;
 import org.jetbrains.kotlin.idea.JetDescriptorIconProvider;
+import org.jetbrains.kotlin.idea.caches.resolve.ResolvePackage;
 import org.jetbrains.kotlin.psi.JetClass;
 import org.jetbrains.kotlin.psi.JetDeclaration;
 import org.jetbrains.kotlin.psi.JetFile;
@@ -44,8 +45,7 @@ import java.util.Collections;
 public class DescriptorClassMember extends MemberChooserObjectBase implements ClassMemberWithElement {
 
     public static final String NO_PARENT_FOR = "No parent for ";
-    @NotNull
-    private final DeclarationDescriptor myDescriptor;
+
     @NotNull
     private final PsiElement myPsiElement;
 
@@ -65,7 +65,6 @@ public class DescriptorClassMember extends MemberChooserObjectBase implements Cl
     public DescriptorClassMember(@NotNull PsiElement element, @NotNull DeclarationDescriptor descriptor) {
         super(getText(descriptor), getIcon(element, descriptor));
         myPsiElement = element;
-        myDescriptor = descriptor;
     }
 
     private static String getText(DeclarationDescriptor descriptor) {
@@ -96,7 +95,6 @@ public class DescriptorClassMember extends MemberChooserObjectBase implements Cl
 
     @Override
     public MemberChooserObject getParentNodeDelegate() {
-        DeclarationDescriptor parent = myDescriptor.getContainingDeclaration();
         PsiElement declaration;
         if (myPsiElement instanceof JetDeclaration) {
             // kotlin
@@ -109,7 +107,9 @@ public class DescriptorClassMember extends MemberChooserObjectBase implements Cl
             // java or bytecode
             declaration = ((PsiMember) myPsiElement).getContainingClass();
         }
-        assert parent != null : NO_PARENT_FOR + myDescriptor;
+        DeclarationDescriptor descriptor = getDescriptor();
+        DeclarationDescriptor parent = descriptor.getContainingDeclaration();
+        assert parent != null : NO_PARENT_FOR + descriptor;
         assert declaration != null : NO_PARENT_FOR + myPsiElement;
 
         if (declaration instanceof JetFile) {
@@ -121,7 +121,7 @@ public class DescriptorClassMember extends MemberChooserObjectBase implements Cl
     }
 
     public DeclarationDescriptor getDescriptor() {
-        return myDescriptor;
+        return ResolvePackage.resolveToDescriptor((JetDeclaration) myPsiElement);
     }
 
     @Override
@@ -131,14 +131,12 @@ public class DescriptorClassMember extends MemberChooserObjectBase implements Cl
 
         DescriptorClassMember that = (DescriptorClassMember) o;
 
-        if (!myDescriptor.equals(that.myDescriptor)) return false;
-
-        return true;
+        return myPsiElement.equals(that.myPsiElement);
     }
 
     @Override
     public int hashCode() {
-        return myDescriptor.hashCode();
+        return myPsiElement.hashCode();
     }
 
     @Override
