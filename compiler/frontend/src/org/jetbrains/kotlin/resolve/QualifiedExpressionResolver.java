@@ -33,6 +33,7 @@ import org.jetbrains.kotlin.resolve.scopes.JetScope;
 import org.jetbrains.kotlin.resolve.scopes.UsageLocation;
 import org.jetbrains.kotlin.resolve.scopes.receivers.ReceiverValue;
 import org.jetbrains.kotlin.resolve.validation.SymbolUsageValidator;
+import org.jetbrains.kotlin.utils.Profiler;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -80,30 +81,49 @@ public class QualifiedExpressionResolver {
             @NotNull BindingTrace trace,
             boolean onlyClassifiers
     ) {
+        Profiler profiler = Profiler.create("Resolve user type: " + userType.hashCode() + " " +
+                                            (userType.getReference() != null ? userType.getReference().hashCode() : null) + " " +
+                                            userType.getReferencedName() + " " + userType.getText()).mute();
 
-        if (userType.isAbsoluteInRootPackage()) {
-            trace.report(Errors.UNSUPPORTED.on(userType, "package"));
-            return Collections.emptyList();
+        Collection<DeclarationDescriptor> result = Collections.emptyList();
+
+        try {
+
+
+            if (userType.isAbsoluteInRootPackage()) {
+                trace.report(Errors.UNSUPPORTED.on(userType, "package"));
+                return result;
+            }
+
+            JetSimpleNameExpression referenceExpression = userType.getReferenceExpression();
+            if (referenceExpression == null) {
+                return result;
+            }
+            JetUserType qualifier = userType.getQualifier();
+
+            // We do not want to resolve the last segment of a user type to a package
+            JetScope filteredScope = filterOutPackagesIfNeeded(outerScope, onlyClassifiers);
+
+            DeclarationDescriptor shouldBeVisibleFrom = outerScope.getContainingDeclaration();
+            if (qualifier == null) {
+                result = lookupDescriptorsForSimpleNameReference(referenceExpression, filteredScope, shouldBeVisibleFrom, trace,
+                                                               LookupMode.ONLY_CLASSES_AND_PACKAGES,
+                                                               false, true);
+            }
+            else {
+                Collection<DeclarationDescriptor> declarationDescriptors =
+                        lookupDescriptorsForUserType(qualifier, outerScope, trace, false);
+                result = lookupSelectorDescriptors(referenceExpression, declarationDescriptors, trace, shouldBeVisibleFrom,
+                                                   LookupMode.ONLY_CLASSES_AND_PACKAGES, true);
+            }
+
+            return result;
+
         }
-
-        JetSimpleNameExpression referenceExpression = userType.getReferenceExpression();
-        if (referenceExpression == null) {
-            return Collections.emptyList();
+        finally {
+            profiler.println(result.size() == 1 ? result.iterator().next().hashCode() : result);
+            profiler.end();
         }
-        JetUserType qualifier = userType.getQualifier();
-
-        // We do not want to resolve the last segment of a user type to a package
-        JetScope filteredScope = filterOutPackagesIfNeeded(outerScope, onlyClassifiers);
-
-        DeclarationDescriptor shouldBeVisibleFrom = outerScope.getContainingDeclaration();
-        if (qualifier == null) {
-            return lookupDescriptorsForSimpleNameReference(referenceExpression, filteredScope, shouldBeVisibleFrom, trace,
-                                                           LookupMode.ONLY_CLASSES_AND_PACKAGES,
-                                                           false, true);
-        }
-        Collection<DeclarationDescriptor> declarationDescriptors = lookupDescriptorsForUserType(qualifier, outerScope, trace, false);
-        return lookupSelectorDescriptors(referenceExpression, declarationDescriptors, trace, shouldBeVisibleFrom,
-                                         LookupMode.ONLY_CLASSES_AND_PACKAGES, true);
     }
 
     private static JetScope filterOutPackagesIfNeeded(final JetScope outerScope, boolean noPackages) {

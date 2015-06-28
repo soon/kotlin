@@ -60,6 +60,7 @@ import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode;
 import org.jetbrains.kotlin.resolve.lazy.ForceResolveUtil;
 import org.jetbrains.kotlin.resolve.lazy.KotlinCodeAnalyzer;
 import org.jetbrains.kotlin.resolve.scopes.JetScope;
+import org.jetbrains.kotlin.utils.Profiler;
 import org.jetbrains.kotlin.resolve.scopes.UsageLocation;
 
 import java.io.IOException;
@@ -122,6 +123,7 @@ public class IDELightClassGenerationSupport extends LightClassGenerationSupport 
     }
 
     private static void forceResolvePackageDeclarations(@NotNull Collection<JetFile> files, @NotNull KotlinCodeAnalyzer session) {
+        Profiler profiler = Profiler.create("ForceResolvePackageDeclarations");
         for (JetFile file : files) {
             // SCRIPT: not supported
             if (file.isScript()) continue;
@@ -161,6 +163,7 @@ public class IDELightClassGenerationSupport extends LightClassGenerationSupport 
                 }
             }
         }
+        profiler.end();
     }
 
     @NotNull
