@@ -459,13 +459,17 @@ public class JetTestUtils {
         else {
             addJvmClasspathRoots(configuration, PathUtil.getJdkClassesRoots());
         }
-        if (configurationKind == ALL) {
+
+        if (configurationKind.getWithRuntime()) {
             addJvmClasspathRoot(configuration, ForTestCompileRuntime.runtimeJarForTests());
+        }
+        if (configurationKind.getWithReflection()) {
             addJvmClasspathRoot(configuration, ForTestCompileRuntime.reflectJarForTests());
         }
+
         addJvmClasspathRoots(configuration, classpath);
 
-        if (configurationKind == ALL || configurationKind == JDK_AND_ANNOTATIONS) {
+        if (configurationKind.getWithJdkAnnotations()) {
             if (jdkKind == TestJdkKind.ANDROID_API) {
                 configuration.add(ANNOTATIONS_PATH_KEY, getAndroidSdkAnnotationsJar());
             }

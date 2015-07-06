@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-package org.jetbrains.kotlin.test;
+package kotlin.reflect.jvm
 
-public enum ConfigurationKind {
-    JDK_ONLY,            // Java runtime classes
-    JDK_AND_ANNOTATIONS, // Java runtime classes with Kotlin's external annotations
-    ALL,                 // Java runtime classes with Kotlin's external annotations and Kotlin stdlib
-}
+import kotlin.jvm.internal.KJvmDeclarationContainer
+import kotlin.reflect.KClass
+
+/**
+ * Returns the JVM name of the class represented by this [KClass] instance.
+ *
+ * @see [java.lang.Class.getName]
+ */
+public val KClass<*>.jvmName: String
+    get() = (this as KJvmDeclarationContainer).jClass.getName()
+

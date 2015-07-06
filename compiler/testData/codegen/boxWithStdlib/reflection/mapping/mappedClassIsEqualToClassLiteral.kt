@@ -1,4 +1,5 @@
 import kotlin.reflect.jvm.*
+import kotlin.jvm.reflect.fixme.*
 
 class A
 

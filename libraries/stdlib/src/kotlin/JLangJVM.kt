@@ -36,6 +36,7 @@ public annotation class throws(public vararg val exceptionClasses: KClass<out Th
 /**
  * Returns the Java class for the specified type.
  */
+@deprecated("Use Klass::class.java instead")
 @Intrinsic("kotlin.javaClass.function") public fun <reified T: Any> javaClass(): Class<T> = null as Class<T>
 
 /**

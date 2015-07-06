@@ -1,5 +1,6 @@
 import kotlin.reflect.jvm.*
 import kotlin.reflect.*
+import kotlin.jvm.reflect.fixme.*
 import kotlin.test.*
 
 open class Super(val r: String)

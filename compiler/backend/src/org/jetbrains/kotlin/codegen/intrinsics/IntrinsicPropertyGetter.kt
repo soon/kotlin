@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package kotlin.reflect.jvm
+package org.jetbrains.kotlin.codegen.intrinsics
 
-import kotlin.reflect.KClass
-import kotlin.reflect.jvm.internal.KClassImpl
+import org.jetbrains.kotlin.codegen.ExpressionCodegen
+import org.jetbrains.kotlin.codegen.StackValue
+import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall
+import org.jetbrains.org.objectweb.asm.Type
 
-/**
- * Returns the JVM name of the class represented by this [KClass] instance.
- *
- * @see [java.lang.Class.getName]
- */
-public val KClass<*>.jvmName: String
-    get() {
-        return (this as KClassImpl).jClass.getName()
-    }
+public abstract class IntrinsicPropertyGetter: IntrinsicMethod() {
+    public abstract fun generate(resolvedCall: ResolvedCall<*>?, codegen: ExpressionCodegen, returnType: Type, receiver: StackValue): StackValue
+}

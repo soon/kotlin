@@ -30,16 +30,15 @@ import org.jetbrains.kotlin.serialization.jvm.JvmProtoBuf
 import org.jetbrains.kotlin.serialization.jvm.JvmProtoBuf.JvmType.PrimitiveType.*
 import java.lang.reflect.Field
 import java.lang.reflect.Method
+import kotlin.jvm.internal.KJvmDeclarationContainer
 import kotlin.reflect.KDeclarationContainer
 import kotlin.reflect.KotlinReflectionInternalError
 
-abstract class KCallableContainerImpl : KDeclarationContainer {
+abstract class KCallableContainerImpl : KJvmDeclarationContainer {
     // Note: this is stored here on a soft reference to prevent GC from destroying the weak reference to it in the moduleByClassLoader cache
     val moduleData by ReflectProperties.lazySoft {
         jClass.getOrCreateModule()
     }
-
-    abstract val jClass: Class<*>
 
     abstract val scope: JetScope
 

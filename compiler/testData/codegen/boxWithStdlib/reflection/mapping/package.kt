@@ -1,6 +1,7 @@
 package test
 
 import kotlin.reflect.jvm.*
+import kotlin.jvm.reflect.fixme.*
 import kotlin.test.*
 
 fun box(): String {

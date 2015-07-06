@@ -1,4 +1,4 @@
-import kotlin.reflect.jvm.kotlin
+import kotlin.jvm.reflect.fixme.kotlin
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KProperty2
 

@@ -21,7 +21,7 @@ import kotlin.reflect.*;
 
 public class ReflectionFactory {
     public KClass createKotlinClass(Class javaClass) {
-        return null;
+        return new ClassReference(javaClass);
     }
 
     public KPackage createKotlinPackage(Class javaClass) {
@@ -29,7 +29,7 @@ public class ReflectionFactory {
     }
 
     public KClass foreignKotlinClass(Class javaClass) {
-        throw error();
+        return new ClassReference(javaClass);
     }
 
     // Functions

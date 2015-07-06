@@ -1,4 +1,4 @@
-import kotlin.reflect.jvm.kotlin
+import kotlin.jvm.reflect.fixme.kotlin
 
 class A(param: String) {
     val int: Int get() = 42

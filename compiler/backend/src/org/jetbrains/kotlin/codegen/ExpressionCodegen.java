@@ -36,9 +36,7 @@ import org.jetbrains.kotlin.codegen.binding.CodegenBinding;
 import org.jetbrains.kotlin.codegen.context.*;
 import org.jetbrains.kotlin.codegen.extensions.ExpressionCodegenExtension;
 import org.jetbrains.kotlin.codegen.inline.*;
-import org.jetbrains.kotlin.codegen.intrinsics.IntrinsicMethod;
-import org.jetbrains.kotlin.codegen.intrinsics.IntrinsicMethods;
-import org.jetbrains.kotlin.codegen.intrinsics.JavaClassProperty;
+import org.jetbrains.kotlin.codegen.intrinsics.*;
 import org.jetbrains.kotlin.codegen.pseudoInsns.PseudoInsnsPackage;
 import org.jetbrains.kotlin.codegen.signature.BothSignatureWriter;
 import org.jetbrains.kotlin.codegen.state.GenerationState;
@@ -1979,10 +1977,10 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
             CallableMemberDescriptor memberDescriptor = DescriptorUtils.unwrapFakeOverride((CallableMemberDescriptor) descriptor);
 
             IntrinsicMethod intrinsic = state.getIntrinsics().getIntrinsic(memberDescriptor);
-            if (intrinsic instanceof JavaClassProperty) {
+            if (intrinsic instanceof IntrinsicPropertyGetter) {
                 //TODO: intrinsic properties (see intermediateValueForProperty)
                 Type returnType = typeMapper.mapType(memberDescriptor);
-                return ((JavaClassProperty) intrinsic).generate(returnType, receiver);
+                return ((IntrinsicPropertyGetter) intrinsic).generate(resolvedCall, this, returnType, receiver);
             }
         }
 

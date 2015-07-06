@@ -3178,6 +3178,33 @@ public class BlackBoxWithStdlibCodegenTestGenerated extends AbstractBlackBoxCode
             }
         }
 
+        @TestMetadata("compiler/testData/codegen/boxWithStdlib/reflection/noKotlinReflect")
+        @TestDataPath("$PROJECT_ROOT")
+        @RunWith(JUnit3RunnerWithInners.class)
+        public static class NoKotlinReflect extends AbstractBlackBoxCodegenTest {
+            public void testAllFilesPresentInNoKotlinReflect() throws Exception {
+                JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/codegen/boxWithStdlib/reflection/noKotlinReflect"), Pattern.compile("^(.+)\\.kt$"), true);
+            }
+
+            @TestMetadata("javaClass.kt")
+            public void testJavaClass() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxWithStdlib/reflection/noKotlinReflect/javaClass.kt");
+                doTestWithStdlib(fileName);
+            }
+
+            @TestMetadata("kotlinClass.kt")
+            public void testKotlinClass() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxWithStdlib/reflection/noKotlinReflect/kotlinClass.kt");
+                doTestWithStdlib(fileName);
+            }
+
+            @TestMetadata("primitives.kt")
+            public void testPrimitives() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxWithStdlib/reflection/noKotlinReflect/primitives.kt");
+                doTestWithStdlib(fileName);
+            }
+        }
+
         @TestMetadata("compiler/testData/codegen/boxWithStdlib/reflection/properties")
         @TestDataPath("$PROJECT_ROOT")
         @RunWith(JUnit3RunnerWithInners.class)
