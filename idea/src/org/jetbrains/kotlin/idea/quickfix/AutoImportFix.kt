@@ -49,7 +49,7 @@ import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 import org.jetbrains.kotlin.utils.CachedValueProperty
 import java.util.ArrayList
 import com.intellij.codeInsight.*
-import org.jetbrains.kotlin.idea.core.isInExcludedPackage
+import org.jetbrains.kotlin.idea.core.isExcludedFromAutoImport
 
 /**
  * Check possibility and perform fix for unresolved references.
@@ -140,21 +140,21 @@ public class AutoImportFix(element: JetSimpleNameExpression) : JetHintAction<Jet
         val result = ArrayList<DeclarationDescriptor>()
 
         val moduleDescriptor = resolutionFacade.findModuleDescriptor(element)
-        val indicesHelper = KotlinIndicesHelper(file.getProject(), resolutionFacade, searchScope, moduleDescriptor, ::isVisible)
+        val indicesHelper = KotlinIndicesHelper(file.getProject(), resolutionFacade, searchScope, moduleDescriptor, ::isVisible, true)
 
         if (!element.isImportDirectiveExpression() && !JetPsiUtil.isSelectorInQualified(element)) {
             if (ProjectStructureUtil.isJsKotlinModule(file)) {
                 result.addAll(indicesHelper.getClassDescriptors({ it == referenceName }, { true }))
             }
             else {
-                getClasses(referenceName, file, searchScope).filterTo(result, ::isVisible)
+                getClasses(referenceName, file, searchScope).filterTo(result, { isVisible(it) && !isExcludedFromAutoImport(it) })
             }
             result.addAll(indicesHelper.getTopLevelCallablesByName(referenceName))
         }
 
         result.addAll(indicesHelper.getCallableTopLevelExtensions({ it == referenceName }, element, bindingContext))
 
-        return result.filter { it -> !isInExcludedPackage(it) }
+        return result
     }
 
     private fun getClasses(name: String, file: JetFile, searchScope: GlobalSearchScope): Collection<DeclarationDescriptor>
