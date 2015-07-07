@@ -1,6 +1,6 @@
 package
 
-internal fun </*0*/ M2 : WithFoo> foo(/*0*/ delegateResolver: ResolverForProject<M2?>): ResolverForProject<M2>
+internal fun </*0*/ M2 : WithFoo> foo(/*0*/ delegateResolver: ResolverForProject<M2?>): ResolverForProject<M2?>
 
 internal interface ResolverForProject</*0*/ M1> {
     internal open val exposeM: M1
