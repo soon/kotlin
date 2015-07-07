@@ -141,14 +141,7 @@ public class CallCompleter(
         }
 
         val constraintSystemCompleter = trace[CONSTRAINT_SYSTEM_COMPLETER, getCall().getCalleeExpression()]
-        if (constraintSystemCompleter != null) {
-            //todo improve error reporting with errors in constraints from completer
-            updateSystemIfSuccessful {
-                system ->
-                constraintSystemCompleter.completeConstraintSystem(system, this)
-                !system.getSystemWithoutWeakConstraints().getStatus().hasOnlyErrorsFromPosition(FROM_COMPLETER.position())
-            }
-        }
+        constraintSystemCompleter?.completeConstraintSystem(getConstraintSystem()!!, this)
 
         if (returnType != null && expectedType === TypeUtils.UNIT_EXPECTED_TYPE) {
             updateSystemIfSuccessful {
@@ -259,8 +252,7 @@ public class CallCompleter(
             expression: JetExpression,
             context: BasicCallResolutionContext
     ): OverloadResolutionResultsImpl<*>? {
-        val cachedData = getResolutionResultsCachedData(expression, context) ?: return null
-        val (cachedResolutionResults, cachedContext, tracing) = cachedData
+        val (cachedResolutionResults, cachedContext, tracing) = getResolutionResultsCachedData(expression, context) ?: return null
 
         @suppress("UNCHECKED_CAST")
         val cachedResults = cachedResolutionResults as OverloadResolutionResultsImpl<CallableDescriptor>

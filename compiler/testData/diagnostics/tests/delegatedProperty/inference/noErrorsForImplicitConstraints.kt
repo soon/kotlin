@@ -1,8 +1,8 @@
 package foo
 
 class A {
-    var a5: String by <!TYPE_INFERENCE_NO_INFORMATION_FOR_PARAMETER!>MyProperty1<!>()
-    var b5: String by <!TYPE_INFERENCE_NO_INFORMATION_FOR_PARAMETER!>getMyProperty1<!>()
+    var a5: String by <!DELEGATE_SPECIAL_FUNCTION_NONE_APPLICABLE!><!TYPE_INFERENCE_INCORPORATION_ERROR!>MyProperty1<!>()<!>
+    var b5: String by <!DELEGATE_SPECIAL_FUNCTION_NONE_APPLICABLE!><!TYPE_INFERENCE_INCORPORATION_ERROR!>getMyProperty1<!>()<!>
 }
 
 fun getMyProperty1<A, B>() = MyProperty1<A, B>()
