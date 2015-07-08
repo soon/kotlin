@@ -45,7 +45,7 @@ class AllClassesCompletion(private val parameters: CompletionParameters,
         filteredBuiltIns.forEach { classDescriptorCollector(it) }
 
         kotlinIndicesHelper
-                .getClassDescriptors({ prefixMatcher.prefixMatches(it) }, kindFilter)
+                .getKotlinClasses({ prefixMatcher.prefixMatches(it) }, kindFilter)
                 .forEach { classDescriptorCollector(it) }
 
         if (!ProjectStructureUtil.isJsKotlinModule(parameters.getOriginalFile() as JetFile)) {

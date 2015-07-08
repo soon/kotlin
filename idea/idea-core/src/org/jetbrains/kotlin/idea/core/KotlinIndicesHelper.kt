@@ -19,9 +19,11 @@ package org.jetbrains.kotlin.idea.core
 import com.intellij.codeInsight.CodeInsightSettings
 import com.intellij.openapi.project.Project
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.PsiShortNamesCache
 import com.intellij.psi.stubs.StringStubIndexExtension
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.idea.caches.resolve.ResolutionFacade
+import org.jetbrains.kotlin.idea.caches.resolve.getResolutionFacade
 import org.jetbrains.kotlin.idea.codeInsight.ReferenceVariantsHelper
 import org.jetbrains.kotlin.idea.imports.importableFqName
 import org.jetbrains.kotlin.idea.stubindex.*
@@ -180,7 +182,14 @@ public class KotlinIndicesHelper(
         return result
     }
 
-    public fun getClassDescriptors(nameFilter: (String) -> Boolean, kindFilter: (ClassKind) -> Boolean): Collection<ClassDescriptor> {
+    public fun getJvmClassesByName(name: String): Collection<ClassifierDescriptor>
+            = PsiShortNamesCache.getInstance(project).getClassesByName(name, scope)
+            .map { resolutionFacade.psiClassToDescriptor(it) }
+            .filterNotNull()
+            .filter(descriptorFilter)
+            .toSet()
+
+    public fun getKotlinClasses(nameFilter: (String) -> Boolean, kindFilter: (ClassKind) -> Boolean): Collection<ClassDescriptor> {
         return JetFullClassNameIndex.getInstance().getAllKeys(project).asSequence()
                 .map { FqName(it) }
                 .filter { nameFilter(it.shortName().asString()) }
@@ -206,12 +215,12 @@ public class KotlinIndicesHelper(
                 .filterIsInstance<CallableDescriptor>()
                 .filter { it.getExtensionReceiverParameter() == null }
     }
-}
 
-public fun isExcludedFromAutoImport(descriptor: DeclarationDescriptor): Boolean {
-    val fqName = descriptor.importableFqName?.asString() ?: return false
+    private fun isExcludedFromAutoImport(descriptor: DeclarationDescriptor): Boolean {
+        val fqName = descriptor.importableFqName?.asString() ?: return false
 
-    return CodeInsightSettings.getInstance().EXCLUDED_PACKAGES
-            .any { excluded -> fqName == excluded || (fqName.startsWith(excluded) && fqName[excluded.length()] == '.') }
+        return CodeInsightSettings.getInstance().EXCLUDED_PACKAGES
+                .any { excluded -> fqName == excluded || (fqName.startsWith(excluded) && fqName[excluded.length()] == '.') }
+    }
 }
 
