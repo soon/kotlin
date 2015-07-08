@@ -15,7 +15,7 @@
  */
 
 // TODO move to kotlin.reflect.jvm once we resolve name clash with kotlin-reflect.jar properly
-package kotlin.jvm.reflect.fixme
+package kotlin.reflect.jvm.lite
 
 import kotlin.jvm.internal.Reflection
 import kotlin.jvm.internal.Intrinsic

@@ -18,6 +18,8 @@ package kotlin.reflect.jvm
 
 import java.lang.reflect.Field
 import java.lang.reflect.Method
+import kotlin.jvm.internal.Intrinsic
+import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KPackage
 import kotlin.reflect.KProperty
@@ -25,6 +27,8 @@ import kotlin.reflect.jvm.internal.KClassImpl
 import kotlin.reflect.jvm.internal.KMutablePropertyImpl
 import kotlin.reflect.jvm.internal.KPackageImpl
 import kotlin.reflect.jvm.internal.KPropertyImpl
+import kotlin.reflect.jvm.lite.java as liteJava
+import kotlin.reflect.jvm.lite.kotlin as liteKotlin
 
 // Kotlin reflection -> Java reflection
 
@@ -92,3 +96,16 @@ public val Field.kotlin: KProperty<*>?
             (p as KPropertyImpl<*>).javaField == this
         }
     }
+
+/**
+ * Returns a Java [Class] instance corresponding to the given [KClass] instance.
+ */
+@Intrinsic("kotlin.KClass.java.property")
+public val <T> KClass<T>.java: Class<T>
+    get() = this.liteJava
+
+/**
+ * Returns a [KClass] instance corresponding to the given Java [Class] instance.
+ */
+public val <T> Class<T>.kotlin: KClass<T>
+    get() = this.liteKotlin

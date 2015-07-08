@@ -1,7 +1,7 @@
 // NO_KOTLIN_REFLECT
 
 import kotlin.test.assertEquals
-import kotlin.jvm.reflect.fixme.*
+import kotlin.reflect.jvm.lite.*
 
 fun box(): String {
     assertEquals("int", Int::class.java.getSimpleName())

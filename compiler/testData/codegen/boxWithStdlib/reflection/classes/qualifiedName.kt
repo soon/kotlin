@@ -1,5 +1,5 @@
 import kotlin.test.assertEquals
-import kotlin.jvm.reflect.fixme.kotlin
+import kotlin.reflect.jvm.*
 
 class Klass {
     class Nested

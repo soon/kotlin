@@ -3,7 +3,7 @@
 import java.lang.Error
 import kotlin.test.assertEquals
 import kotlin.test.fail
-import kotlin.jvm.reflect.fixme.*
+import kotlin.reflect.jvm.lite.*
 
 class Klass
 

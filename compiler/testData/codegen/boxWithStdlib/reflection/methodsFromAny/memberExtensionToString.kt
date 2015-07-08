@@ -1,4 +1,4 @@
-import kotlin.jvm.reflect.fixme.kotlin
+import kotlin.reflect.jvm.*
 
 class A {
     var String.id: String

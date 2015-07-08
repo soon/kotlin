@@ -1,4 +1,4 @@
-import kotlin.jvm.reflect.fixme.kotlin
+import kotlin.reflect.jvm.*
 import kotlin.reflect.KMutableProperty1
 
 class A(val readonly: String) {
