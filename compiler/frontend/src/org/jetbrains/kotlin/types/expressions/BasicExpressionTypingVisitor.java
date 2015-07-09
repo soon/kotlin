@@ -587,13 +587,21 @@ public class BasicExpressionTypingVisitor extends ExpressionTypingVisitor {
         if (type.isMarkedNullable()) return false;
 
         TypeConstructor typeConstructor = type.getConstructor();
-        if (!(typeConstructor.getDeclarationDescriptor() instanceof ClassDescriptor)) return false;
+        ClassifierDescriptor typeDeclarationDescriptor = typeConstructor.getDeclarationDescriptor();
 
-        List<TypeParameterDescriptor> parameters = typeConstructor.getParameters();
-        if (parameters.size() != type.getArguments().size()) return false;
+        if (typeDeclarationDescriptor instanceof ClassDescriptor) {
+            List<TypeParameterDescriptor> parameters = typeConstructor.getParameters();
+            if (parameters.size() != type.getArguments().size()) return false;
 
-        for (TypeParameterDescriptor parameter : parameters) {
-            if (!parameter.isReified()) return false;
+            for (TypeParameterDescriptor parameter : parameters) {
+                if (!parameter.isReified()) return false;
+            }
+        }
+        else if (typeDeclarationDescriptor instanceof TypeParameterDescriptor) {
+            if (!((TypeParameterDescriptor) typeDeclarationDescriptor).isReified()) return false;
+        }
+        else {
+            return false;
         }
 
         return true;
