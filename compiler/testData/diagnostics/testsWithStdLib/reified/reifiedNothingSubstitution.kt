@@ -10,5 +10,5 @@ fun box() {
     val e = <!REIFIED_TYPE_FORBIDDEN_SUBSTITUTION!>foo<!> { "1" as Nothing }
     val e1 = <!REIFIED_TYPE_FORBIDDEN_SUBSTITUTION!>foo<!> { "1" as Nothing? }
 
-    val f = <!REIFIED_TYPE_FORBIDDEN_SUBSTITUTION!>javaClass<!><Nothing>()
+    val f = <!REIFIED_TYPE_FORBIDDEN_SUBSTITUTION, DEPRECATED_SYMBOL_WITH_MESSAGE!>javaClass<!><Nothing>()
 }

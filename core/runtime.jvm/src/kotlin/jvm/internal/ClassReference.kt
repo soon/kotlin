@@ -32,4 +32,6 @@ public class ClassReference(public override val jClass: Class<Any>) : KClass<Any
 
     public override val extensionProperties: Collection<KProperty2<Any, *, *>>
         get() = throw KotlinReflectionNotSupportedError()
+
+    override fun toString(): String = jClass.toString()
 }

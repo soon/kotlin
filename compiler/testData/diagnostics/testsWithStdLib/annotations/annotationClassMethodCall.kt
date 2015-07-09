@@ -15,8 +15,8 @@ fun foo(ann: A) {
     ann.toString()
     ann.hashCode()
 
-    javaClass<MyClass>().getAnnotation(javaClass<A>()).<!DEPRECATED_ANNOTATION_METHOD_CALL!>value()<!>
-    javaClass<MyClass>().getAnnotation(javaClass<A>()).<!DEPRECATED_ANNOTATION_METHOD_CALL!>arg()<!>
+    <!DEPRECATED_SYMBOL_WITH_MESSAGE!>javaClass<!><MyClass>().getAnnotation(<!DEPRECATED_SYMBOL_WITH_MESSAGE!>javaClass<!><A>()).<!DEPRECATED_ANNOTATION_METHOD_CALL!>value()<!>
+    <!DEPRECATED_SYMBOL_WITH_MESSAGE!>javaClass<!><MyClass>().getAnnotation(<!DEPRECATED_SYMBOL_WITH_MESSAGE!>javaClass<!><A>()).<!DEPRECATED_ANNOTATION_METHOD_CALL!>arg()<!>
 }
 
 fun A.bar() {
