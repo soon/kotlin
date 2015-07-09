@@ -239,7 +239,8 @@ public class JvmCodegenUtil {
                InlineUtil.isInlinedArgument((JetFunction) declaration, bindingContext, false);
     }
 
-    public static boolean shouldUseJavaClassForClassLiteral(ClassifierDescriptor descriptor, ModuleDescriptor module) {
+    public static boolean shouldUseJavaClassForClassLiteral(@NotNull ClassifierDescriptor descriptor) {
+        ModuleDescriptor module = DescriptorUtils.getContainingModule(descriptor);
         return descriptor instanceof JavaClassDescriptor ||
                module == module.getBuiltIns().getBuiltInsModule() ||
                DescriptorUtils.isAnnotationClass(descriptor);

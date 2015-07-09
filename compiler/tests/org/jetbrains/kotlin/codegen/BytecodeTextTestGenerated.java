@@ -125,6 +125,12 @@ public class BytecodeTextTestGenerated extends AbstractBytecodeTextTest {
         doTest(fileName);
     }
 
+    @TestMetadata("javaClassIntrinsic.kt")
+    public void testJavaClassIntrinsic() throws Exception {
+        String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/bytecodeText/javaClassIntrinsic.kt");
+        doTest(fileName);
+    }
+
     @TestMetadata("kt2202.kt")
     public void testKt2202() throws Exception {
         String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/bytecodeText/kt2202.kt");

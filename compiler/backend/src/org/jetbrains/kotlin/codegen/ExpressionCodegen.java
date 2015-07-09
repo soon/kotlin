@@ -1979,7 +1979,8 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
             if (intrinsic instanceof IntrinsicPropertyGetter) {
                 //TODO: intrinsic properties (see intermediateValueForProperty)
                 Type returnType = typeMapper.mapType(memberDescriptor);
-                return ((IntrinsicPropertyGetter) intrinsic).generate(resolvedCall, this, returnType, receiver);
+                StackValue intrinsicResult = ((IntrinsicPropertyGetter) intrinsic).generate(resolvedCall, this, returnType, receiver);
+                if (intrinsicResult != null) return intrinsicResult;
             }
         }
 
@@ -2792,8 +2793,6 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
             public Unit invoke(InstructionAdapter v) {
                 Type classAsmType = typeMapper.mapType(type);
                 ClassifierDescriptor descriptor = type.getConstructor().getDeclarationDescriptor();
-                //noinspection ConstantConditions
-                ModuleDescriptor module = DescriptorUtils.getContainingModule(descriptor);
                 if (descriptor instanceof TypeParameterDescriptor) {
                     TypeParameterDescriptor typeParameterDescriptor = (TypeParameterDescriptor) descriptor;
                     if (typeParameterDescriptor.isReified()) {
@@ -2812,7 +2811,7 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
                                                  typeParameterDescriptor.getName().asString());
                     }
                 }
-                else if (shouldUseJavaClassForClassLiteral(descriptor, module)) {
+                else if (shouldUseJavaClassForClassLiteral(descriptor)) {
                     putJavaLangClassInstance(v, classAsmType);
                     wrapJavaClassIntoKClass(v);
                 }

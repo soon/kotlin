@@ -20,52 +20,58 @@ import org.jetbrains.kotlin.codegen.AsmUtil
 import org.jetbrains.kotlin.codegen.Callable
 import org.jetbrains.kotlin.codegen.ExpressionCodegen
 import org.jetbrains.kotlin.codegen.StackValue
+import org.jetbrains.kotlin.codegen.inline.ReifiedTypeInliner
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
+import org.jetbrains.kotlin.descriptors.TypeParameterDescriptor
 import org.jetbrains.kotlin.psi.JetClassLiteralExpression
 import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall
 import org.jetbrains.kotlin.resolve.jvm.AsmTypes
 import org.jetbrains.kotlin.resolve.scopes.receivers.ExpressionReceiver
+import org.jetbrains.kotlin.types.JetType
 import org.jetbrains.org.objectweb.asm.Type
 import org.jetbrains.org.objectweb.asm.commons.InstructionAdapter
 import kotlin.reflect.KClass
 
 public class KClassJavaProperty : IntrinsicPropertyGetter() {
-    public override fun generate(resolvedCall: ResolvedCall<*>?, codegen: ExpressionCodegen, returnType: Type, receiver: StackValue): StackValue {
-        val underlyingClass = resolvedCall!!.getExtensionReceiver().getType().getArguments()[0].getType()
-        val underlyingType = codegen.getState().getTypeMapper().mapType(underlyingClass)
+    public override fun generate(resolvedCall: ResolvedCall<*>?, codegen: ExpressionCodegen, returnType: Type, receiver: StackValue): StackValue? {
+        val type = resolvedCall!!.getExtensionReceiver().getType().getArguments().single().getType()
+        val asmType = codegen.getState().getTypeMapper().mapType(type)
 
+        return when {
+            isReifiedTypeParameter(type) -> {
+                StackValue.operation(returnType) { iv ->
+                    codegen.putReifierMarkerIfTypeIsReifiedParameter(type, ReifiedTypeInliner.JAVA_CLASS_MARKER_METHOD_NAME)
+                    AsmUtil.putJavaLangClassInstance(iv, asmType)
+                    coerceToJavaLangClass(iv, returnType)
+                }
+            }
+            isWithClassLiteralArgument(resolvedCall) -> {
+                StackValue.operation(returnType) { iv ->
+                    if (AsmUtil.isPrimitive(asmType)) {
+                        iv.getstatic(AsmUtil.boxType(asmType).getInternalName(), "TYPE", "Ljava/lang/Class;")
+                    }
+                    else {
+                        iv.tconst(asmType)
+                    }
+                    coerceToJavaLangClass(iv, returnType)
+                }
+            }
+            else -> null
+        }
+    }
+
+    private fun isReifiedTypeParameter(type: JetType): Boolean {
+        val typeDescriptor = type.getConstructor().getDeclarationDescriptor()
+        return typeDescriptor is TypeParameterDescriptor && typeDescriptor.isReified()
+    }
+
+    private fun isWithClassLiteralArgument(resolvedCall: ResolvedCall<*>): Boolean {
         val extensionReceiver = resolvedCall.getExtensionReceiver()
-
-        if (extensionReceiver is ExpressionReceiver && extensionReceiver.getExpression() is JetClassLiteralExpression) {
-            return StackValue.operation(returnType) { iv ->
-                generateStaticTypeConst(iv, underlyingType)
-                coerceToJavaLangClass(iv, returnType)
-            }
-        }
-        else {
-            return StackValue.operation(returnType) { iv ->
-                generateDynamicTypeQuery(iv, receiver)
-                coerceToJavaLangClass(iv, returnType)
-            }
-        }
+        return extensionReceiver is ExpressionReceiver && extensionReceiver.getExpression() is JetClassLiteralExpression
     }
 
     private fun coerceToJavaLangClass(iv: InstructionAdapter, returnType: Type) {
         StackValue.coerce(AsmTypes.getType(javaClass<Class<Any>>()), returnType, iv)
-    }
-
-    private fun generateStaticTypeConst(iv: InstructionAdapter, type: Type) {
-        if (AsmUtil.isPrimitive(type)) {
-            iv.getstatic(AsmUtil.boxType(type).getInternalName(), "TYPE", "Ljava/lang/Class;")
-        }
-        else {
-            iv.tconst(type)
-        }
-    }
-
-    private fun generateDynamicTypeQuery(iv: InstructionAdapter, receiver: StackValue) {
-        receiver.put(AsmTypes.getType(javaClass<KClass<Any>>()), iv)
-        iv.invokeinterface("kotlin/jvm/internal/KJvmDeclarationContainer", "getjClass", "()Ljava/lang/Class;")
     }
 
 }

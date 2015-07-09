@@ -181,9 +181,8 @@ public class ReifiedTypeInliner(private val parametersMapping: ReifiedTypeParame
     private fun processClassLiteral(insn: MethodInsnNode, parameter: Type, instructions: InsnList, type: JetType): Boolean {
         val next = insn.getNext()
         if (next !is FieldInsnNode || next.getOpcode() != Opcodes.GETSTATIC) return false
-        val descriptor = type.getConstructor().getDeclarationDescriptor()
-        val module = DescriptorUtils.getContainingModule(descriptor!!)
-        if (JvmCodegenUtil.shouldUseJavaClassForClassLiteral(descriptor, module)) {
+        val descriptor = type.getConstructor().getDeclarationDescriptor()!!
+        if (JvmCodegenUtil.shouldUseJavaClassForClassLiteral(descriptor)) {
             instructions.insertBefore(next,
                                       if (AsmUtil.isPrimitive(parameter))
                                           FieldInsnNode(Opcodes.GETSTATIC,
