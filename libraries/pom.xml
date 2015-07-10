@@ -90,6 +90,9 @@
         <module>examples/annotation-processor-example</module>
         <module>tools/kotlin-gradle-plugin</module>
         <module>tools/kotlin-gradle-plugin-core</module>
+        <module>tools/kotlin-gradle-1.6-plugin-tasks</module>
+        <module>tools/kotlin-gradle-1.12-plugin-tasks</module>
+        <module>tools/kotlin-gradle-2.2-plugin-tasks</module>
         <module>tools/kotlin-gradle-plugin-api</module>
         <module>tools/kotlin-android-extensions</module>
         <module>tools/kotlin-maven-plugin-test</module>

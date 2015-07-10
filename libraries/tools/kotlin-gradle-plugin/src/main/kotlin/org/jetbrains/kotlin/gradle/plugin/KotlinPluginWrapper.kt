@@ -13,6 +13,7 @@ import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logger
 import java.lang.reflect.Method
 import org.jetbrains.kotlin.gradle.tasks.KotlinTasksProvider
+import kotlin.text.Regex
 
 abstract class KotlinBasePluginWrapper: Plugin<Project> {
     val log = Logging.getLogger(this.javaClass)
@@ -29,24 +30,46 @@ abstract class KotlinBasePluginWrapper: Plugin<Project> {
         val kotlinPluginVersion = loadKotlinVersionFromResource(log)
         project.getExtensions().getExtraProperties()?.set("kotlin.gradle.plugin.version", kotlinPluginVersion)
 
-        val pluginClassLoader = createPluginIsolatedClassLoader(kotlinPluginVersion, sourceBuildScript)
+        val gradleVersion = project.getGradle().getGradleVersion()
+
+        val pluginClassLoader = createPluginIsolatedClassLoader(gradleVersion, kotlinPluginVersion, sourceBuildScript)
+//        val pluginClassLoader = ClassLoader.getSystemClassLoader()
         val plugin = getPlugin(pluginClassLoader, sourceBuildScript)
         plugin.apply(project)
 
-        project.getGradle().addBuildListener(FinishBuildListener(pluginClassLoader))
+        //project.getGradle().addBuildListener(FinishBuildListener(pluginClassLoader))
     }
 
-    protected abstract fun getPlugin(pluginClassLoader: ParentLastURLClassLoader, scriptHandler: ScriptHandler): Plugin<Project>
+    protected abstract fun getPlugin(pluginClassLoader: ClassLoader, scriptHandler: ScriptHandler): Plugin<Project>
 
-    private fun createPluginIsolatedClassLoader(projectVersion: String, sourceBuildScript: ScriptHandler): ParentLastURLClassLoader {
+    private fun createPluginIsolatedClassLoader(gradleVersion: String, projectVersion: String, sourceBuildScript: ScriptHandler): ParentLastURLClassLoader {
         val dependencyHandler: DependencyHandler = sourceBuildScript.getDependencies()
         val configurationsContainer: ConfigurationContainer = sourceBuildScript.getConfigurations()
 
-        log.kotlinDebug("Creating configuration and dependency")
-        val kotlinPluginCoreCoordinates = "org.jetbrains.kotlin:kotlin-gradle-plugin-core:" + projectVersion
+        log.kotlinDebug("Creating configuration and dependency; gradle version $gradleVersion, project version $projectVersion")
+        // \todo make version comparison more reliable
+        // it seems though that the gradle utilities for that are not suitable (https://discuss.gradle.org/t/is-there-a-way-to-programmatically-ensure-a-minimum-gradle-version-using-non-internal-gradle-apis/5890/1)
+        //   so some guessing is needed anyway
+        val versionRegex = Regex("^(\\d+)\\.(\\d+).*$")
+        val match = versionRegex.match(gradleVersion)
+        val gradleVersionInt =
+            try {
+                if (match == null || match.groups.size() != 3) 0
+                else match.groups.get(1)!!.value.toInt() * 1000 + match.groups.get(2)!!.value.toInt()
+            }
+            catch (e: Exception) { 0 }
+        if (gradleVersionInt <= 0)
+            throw Exception("Cannot parse gradle version $gradleVersion, ${match?.groups?.map { it?.value }?.joinToString(",")}")
+        val kotlinPluginCoreCoordinates =
+                (when {
+                    gradleVersionInt < 1009 -> "org.jetbrains.kotlin:kotlin-gradle-1.6-plugin-tasks:"
+                    gradleVersionInt < 2001 -> "org.jetbrains.kotlin:kotlin-gradle-1.12-plugin-tasks:"
+                    else -> "org.jetbrains.kotlin:kotlin-gradle-2.2-plugin-tasks:"
+                }) +
+                projectVersion
         val dependency = dependencyHandler.create(kotlinPluginCoreCoordinates)
         val configuration = configurationsContainer.detachedConfiguration(dependency)
-
+2
         log.kotlinDebug("Resolving [" + kotlinPluginCoreCoordinates + "]")
         val kotlinPluginDependencies: List<URL> = configuration.getResolvedConfiguration().getFiles({ true })!!.map { it.toURI().toURL() }
         log.kotlinDebug("Resolved files: [" + kotlinPluginDependencies.toString() + "]")
@@ -76,15 +99,15 @@ abstract class KotlinBasePluginWrapper: Plugin<Project> {
 }
 
 open class KotlinPluginWrapper: KotlinBasePluginWrapper() {
-    override fun getPlugin(pluginClassLoader: ParentLastURLClassLoader, scriptHandler: ScriptHandler) = KotlinPlugin(scriptHandler, KotlinTasksProvider(pluginClassLoader))
+    override fun getPlugin(pluginClassLoader: ClassLoader, scriptHandler: ScriptHandler) = KotlinPlugin(scriptHandler, KotlinTasksProvider(pluginClassLoader))
 }
 
 open class KotlinAndroidPluginWrapper : KotlinBasePluginWrapper() {
-    override fun getPlugin(pluginClassLoader: ParentLastURLClassLoader, scriptHandler: ScriptHandler) = KotlinAndroidPlugin(scriptHandler, KotlinTasksProvider(pluginClassLoader))
+    override fun getPlugin(pluginClassLoader: ClassLoader, scriptHandler: ScriptHandler) = KotlinAndroidPlugin(scriptHandler, KotlinTasksProvider(pluginClassLoader))
 }
 
 open class Kotlin2JsPluginWrapper : KotlinBasePluginWrapper() {
-    override fun getPlugin(pluginClassLoader: ParentLastURLClassLoader, scriptHandler: ScriptHandler) = Kotlin2JsPlugin(scriptHandler, KotlinTasksProvider(pluginClassLoader))
+    override fun getPlugin(pluginClassLoader: ClassLoader, scriptHandler: ScriptHandler) = Kotlin2JsPlugin(scriptHandler, KotlinTasksProvider(pluginClassLoader))
 }
 
 fun Logger.kotlinDebug(message: String) {

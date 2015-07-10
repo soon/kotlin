@@ -16,7 +16,7 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>kotlin-gradle-plugin-core</artifactId>
+    <artifactId>kotlin-gradle-1.6-plugin-tasks</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -30,6 +30,11 @@
             <artifactId>kotlin-gradle-plugin-api</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-gradle-plugin-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency> <!-- required in runtime -->
             <groupId>commons-lang</groupId>

@@ -45,6 +45,24 @@
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-gradle-1.6-plugin-tasks</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-gradle-1.12-plugin-tasks</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-gradle-2.2-plugin-tasks</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-gradle-plugin-core</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
@@ -114,6 +132,9 @@
                     <postBuildHookScript>verify</postBuildHookScript> <!-- no extension required -->
                     <extraArtifacts>
                         <extraArtifact>org.jetbrains.kotlin:kotlin-gradle-plugin-core:${project.version}</extraArtifact>
+                        <extraArtifact>org.jetbrains.kotlin:kotlin-gradle-1.6-plugin-tasks:${project.version}</extraArtifact>
+                        <extraArtifact>org.jetbrains.kotlin:kotlin-gradle-1.12-plugin-tasks:${project.version}</extraArtifact>
+                        <extraArtifact>org.jetbrains.kotlin:kotlin-gradle-2.2-plugin-tasks:${project.version}</extraArtifact>
                         <extraArtifact>org.jetbrains.kotlin:kotlin-jdk-annotations:${project.version}</extraArtifact>
                         <extraArtifact>org.jetbrains.kotlin:kotlin-js-library:${project.version}</extraArtifact>
                         <extraArtifact>org.jetbrains.kotlin:kotlin-android-sdk-annotations:${project.version}</extraArtifact>
