@@ -87,15 +87,16 @@ public fun PsiReference.matchesTarget(candidateTarget: PsiElement): Boolean {
         }
         if ((parent as? PsiNewExpression)?.resolveConstructor()?.unwrapped == unwrappedCandidate) return true
     }
-    if (this is PsiReferenceExpression && candidateTarget is JetObjectDeclaration && unwrappedTargets.size() == 1) {
+    if (this is PsiJavaCodeReferenceElement && candidateTarget is JetObjectDeclaration && unwrappedTargets.size() == 1) {
         val referredClass = unwrappedTargets.first()
         if (referredClass is JetClass && candidateTarget in referredClass.getCompanionObjects()) {
-            val parentReference = getParent().getReference()
-            if (parentReference != null) {
-                return parentReference.unwrappedTargets.any {
-                    (it is JetProperty || it is JetNamedFunction) && it.getParent()?.getParent() == candidateTarget
-                }
-            }
+            val staticMemberUsed = getParent().getReference()?.unwrappedTargets?.any {
+                (it is JetProperty || it is JetNamedFunction) && it.getParent()?.getParent() == candidateTarget
+            } ?: false
+
+            val staticImport = getParent() is PsiImportStaticStatement
+
+            return staticMemberUsed || staticImport
         }
     }
     return false
