@@ -97,6 +97,12 @@ public abstract class KotlinDebuggerTestCase extends DescriptorTestCase {
         });
     }
 
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        VfsRootAccess.allowRootAccess(JetTestUtils.getHomeDirectory());
+    }
+
     private static void configureCustomLibrary(@NotNull ModifiableRootModel model, @NotNull VirtualFile customLibrarySources) {
         NewLibraryEditor customLibEditor = new NewLibraryEditor();
         customLibEditor.setName("CustomLibrary");
@@ -106,12 +112,6 @@ public abstract class KotlinDebuggerTestCase extends DescriptorTestCase {
         customLibEditor.addRoot(customLibrarySources, OrderRootType.SOURCES);
 
         ConfigLibraryUtil.addLibrary(customLibEditor, model);
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        VfsRootAccess.allowRootAccess(JetTestUtils.getHomeDirectory());
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")

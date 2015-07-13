@@ -60,6 +60,9 @@ abstract class KotlinDebuggerTestBase : KotlinDebuggerTestCase() {
     protected var evaluationContext: EvaluationContextImpl? = null
     protected var debuggerContext: DebuggerContextImpl? = null
 
+    protected val dp: DebugProcessImpl
+        get() = getDebugProcess() ?: throw AssertionError("createLocalProcess() should be called before getDebugProcess()")
+
     override fun initApplication() {
         super.initApplication()
         saveDefaultSettings()
@@ -71,6 +74,7 @@ abstract class KotlinDebuggerTestBase : KotlinDebuggerTestCase() {
 
         evaluationContext = null
         debuggerContext = null
+        oldSettings = null
     }
 
     protected fun configureSettings(fileText: String) {
@@ -110,9 +114,6 @@ abstract class KotlinDebuggerTestBase : KotlinDebuggerTestCase() {
         debuggerSettings.TRACING_FILTERS_ENABLED = oldSettings!!.TRACING_FILTERS_ENABLED
         debuggerSettings.SKIP_GETTERS = oldSettings!!.SKIP_GETTERS
     }
-
-    protected val dp: DebugProcessImpl
-        get() = getDebugProcess() ?: throw AssertionError("createLocalProcess() should be called before getDebugProcess()")
 
     public fun doOnBreakpoint(action: SuspendContextImpl.() -> Unit) {
         super.onBreakpoint {
