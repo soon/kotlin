@@ -631,6 +631,7 @@ private fun Project.initKapt(
 
     javaTask.doFirst {
         kaptManager.setupKapt()
+        kotlinAfterJavaTask?.source(kaptManager.getGeneratedKotlinSourceDir())
     }
 
     javaTask.doLast {
