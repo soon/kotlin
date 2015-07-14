@@ -23,15 +23,13 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
 import com.intellij.refactoring.BaseRefactoringProcessor;
+import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.util.PathUtil;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.Convertor;
 import kotlin.jvm.functions.Function0;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.kotlin.idea.test.ConfigLibraryUtil;
-import org.jetbrains.kotlin.idea.test.DirectiveBasedActionUtils;
-import org.jetbrains.kotlin.idea.test.KotlinCodeInsightTestCase;
-import org.jetbrains.kotlin.idea.test.PluginTestCaseBase;
+import org.jetbrains.kotlin.idea.test.*;
 import org.jetbrains.kotlin.idea.util.application.ApplicationPackage;
 import org.jetbrains.kotlin.psi.JetFile;
 import org.jetbrains.kotlin.test.InTextDirectivesUtils;
@@ -42,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractIntentionTest extends KotlinCodeInsightTestCase {
+public abstract class AbstractIntentionTest extends JetLightCodeInsightFixtureTestCase {
     private static IntentionAction createIntention(File testDataFile) throws Exception {
         List<File> candidateFiles = Lists.newArrayList();
 
@@ -70,6 +68,12 @@ public abstract class AbstractIntentionTest extends KotlinCodeInsightTestCase {
 
     private static final String[] EXTENSIONS = { ".kt", ".java", ".groovy" };
 
+    @NotNull
+    @Override
+    protected LightProjectDescriptor getProjectDescriptor() {
+        return getProjectDescriptorFromTestName();
+    }
+
     protected void doTest(@NotNull String path) throws Exception {
         File mainFile = new File(path);
         String mainFileName = FileUtil.getNameWithoutExtension(mainFile);
@@ -96,40 +100,23 @@ public abstract class AbstractIntentionTest extends KotlinCodeInsightTestCase {
                     @Override
                     public PsiFile convert(String path) {
                         try {
-                            configureByFile(path);
+                            myFixture.configureByFile(path);
                         }
                         catch (Exception e) {
                             throw new RuntimeException(e);
                         }
-                        return myFile;
+                        return myFixture.getFile();
                     }
                 }
         );
 
         String fileText = FileUtil.loadFile(mainFile, true);
 
-        String minJavaVersion = InTextDirectivesUtils.findStringWithPrefixes(fileText, "// MIN_JAVA_VERSION: ");
-        if (minJavaVersion != null && !SystemInfo.isJavaVersionAtLeast(minJavaVersion)) return;
-
-        boolean isWithRuntime = InTextDirectivesUtils.findStringWithPrefixes(fileText, "// WITH_RUNTIME") != null;
-
-        try {
-            if (isWithRuntime) {
-                ConfigLibraryUtil.configureKotlinRuntimeAndSdk(getModule(), PluginTestCaseBase.mockJdk());
-            }
-
-            DirectiveBasedActionUtils.INSTANCE$.checkForUnexpectedErrors((JetFile) getFile());
-
-            doTestFor(pathToFile, intentionAction, fileText);
-        }
-        finally {
-            if (isWithRuntime) {
-                ConfigLibraryUtil.unConfigureKotlinRuntimeAndSdk(getModule(), getTestProjectJdk());
-            }
-        }
+        DirectiveBasedActionUtils.INSTANCE$.checkForUnexpectedErrors((JetFile) getFile());
+        doTestFor(sourceFilePaths, intentionAction, fileText);
     }
 
-    private void doTestFor(Map<String, PsiFile> pathToFile, final IntentionAction intentionAction, String fileText) throws Exception {
+    private void doTestFor(List<String> pathToFile, final IntentionAction intentionAction, String fileText) throws Exception {
         String isApplicableString = InTextDirectivesUtils.findStringWithPrefixes(fileText, "// IS_APPLICABLE: ");
         boolean isApplicableExpected = isApplicableString == null || isApplicableString.equals("true");
 
@@ -161,12 +148,10 @@ public abstract class AbstractIntentionTest extends KotlinCodeInsightTestCase {
                 );
                 // Don't bother checking if it should have failed.
                 if (shouldFailString == null) {
-                    for (Map.Entry<String, PsiFile> entry: pathToFile.entrySet()) {
+                    for (String path : pathToFile) {
                         //noinspection AssignmentToStaticFieldFromInstanceMethod
-                        myFile = entry.getValue();
-                        String canonicalPathToExpectedFile = PathUtil.getCanonicalPath(entry.getKey() + ".after");
-
-                        checkResultByFile(canonicalPathToExpectedFile);
+                        // myFixture.configureByFile(entry.getKey());
+                        // myFixture.checkResultByFile(PathUtil.getCanonicalPath(path + ".after"));
                     }
                 }
             }
@@ -178,9 +163,15 @@ public abstract class AbstractIntentionTest extends KotlinCodeInsightTestCase {
     }
 
     @Override
-    protected void setUp() throws Exception {
+    protected void setUp() {
         super.setUp();
         //((StartupManagerImpl) StartupManager.getInstance(getProject())).runPostStartupActivities();
+    }
+
+    @NotNull
+    @Override
+    protected String fileName() {
+        return super.fileName();
     }
 
     @NotNull
