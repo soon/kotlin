@@ -96,13 +96,6 @@ public abstract class AnnotationCodegen {
 
         Annotations annotations = annotated.getAnnotations();
 
-        for (AnnotationDescriptor annotation : annotations) {
-            String descriptor = genAnnotation(annotation);
-            if (descriptor != null) {
-                annotationDescriptorsAlreadyPresent.add(descriptor);
-            }
-        }
-
         if (target != null) {
             for (AnnotationWithTarget annotationWithTarget : annotations.getUseSiteTargetedAnnotations()) {
                 if (target != annotationWithTarget.getTarget()) continue;
@@ -111,6 +104,13 @@ public abstract class AnnotationCodegen {
                 if (descriptor != null) {
                     annotationDescriptorsAlreadyPresent.add(descriptor);
                 }
+            }
+        }
+
+        for (AnnotationDescriptor annotation : annotations) {
+            String descriptor = genAnnotation(annotation);
+            if (descriptor != null) {
+                annotationDescriptorsAlreadyPresent.add(descriptor);
             }
         }
 
