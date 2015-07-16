@@ -253,14 +253,35 @@ public class FunctionCodegen {
             if (kind == JvmMethodParameterKind.VALUE) {
                 ValueParameterDescriptor parameter = iterator.next();
                 v.getSerializationBindings().put(INDEX_FOR_VALUE_PARAMETER, parameter, i);
-                AnnotationCodegen.forParameter(i, mv, typeMapper).genAnnotations(parameter, parameterSignature.getAsmType());
-            }
-            else if (kind == JvmMethodParameterKind.RECEIVER) {
+
                 AnnotationCodegen annotationCodegen = AnnotationCodegen.forParameter(i, mv, typeMapper);
-                Annotated targetedAnnotations = new AnnotatedWithAdditionalAnnotations(null, functionDescriptor);
-                annotationCodegen.genAnnotations(targetedAnnotations, parameterSignature.getAsmType(), RECEIVER);
+
+                if (functionDescriptor instanceof PropertySetterDescriptor) {
+                    PropertyDescriptor propertyDescriptor = ((PropertySetterDescriptor) functionDescriptor).getCorrespondingProperty();
+                    generateTargetedParameterAnnotations(annotationCodegen, propertyDescriptor, parameterSignature, SETTER_PARAMETER);
+                }
+
+                if (functionDescriptor instanceof ConstructorDescriptor) {
+                    annotationCodegen.genAnnotations(parameter, parameterSignature.getAsmType(), CONSTRUCTOR_PARAMETER);
+                }
+                else {
+                    annotationCodegen.genAnnotations(parameter, parameterSignature.getAsmType());
+                }
+            } else if (kind == JvmMethodParameterKind.RECEIVER) {
+                AnnotationCodegen annotationCodegen = AnnotationCodegen.forParameter(i, mv, typeMapper);
+                generateTargetedParameterAnnotations(annotationCodegen, functionDescriptor, parameterSignature, RECEIVER);
             }
         }
+    }
+
+    private void generateTargetedParameterAnnotations(
+            AnnotationCodegen codegen,
+            Annotated annotated,
+            JvmMethodParameterSignature parameterSignature,
+            AnnotationUseSiteTarget target
+    ) {
+        Annotated targetedAnnotations = new AnnotatedWithAdditionalAnnotations(null, annotated);
+        codegen.genAnnotations(targetedAnnotations, parameterSignature.getAsmType(), target);
     }
 
     @SuppressWarnings("deprecation")

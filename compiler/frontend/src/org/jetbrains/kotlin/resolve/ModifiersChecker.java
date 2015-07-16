@@ -331,6 +331,10 @@ public class ModifiersChecker {
                         reportAnnotationTargetNotApplicable(annotation, INAPPLICABLE_RECEIVER_TARGET);
                     }
                 }
+                case SETTER_PARAMETER: {
+                    reportIfNotMutableProperty(descriptor, annotation, INAPPLICABLE_SPARAM_TARGET);
+                    break;
+                }
                 case FILE:
                     throw new IllegalArgumentException("@file annotations are not allowed here");
             }
