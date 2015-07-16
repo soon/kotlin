@@ -311,6 +311,9 @@ public class ModifiersChecker {
                 case FIELD:
                     checkFieldTargetApplicability(modifierListOwner, descriptor, annotation);
                     break;
+                case PROPERTY:
+                    reportIfNotPropertyDescriptor(descriptor, annotation, INAPPLICABLE_PROPERTY_TARGET);
+                    break;
                 case PROPERTY_GETTER:
                     reportIfNotPropertyDescriptor(descriptor, annotation, INAPPLICABLE_GET_TARGET);
                     break;
