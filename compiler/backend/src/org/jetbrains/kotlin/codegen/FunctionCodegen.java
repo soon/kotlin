@@ -255,6 +255,11 @@ public class FunctionCodegen {
                 v.getSerializationBindings().put(INDEX_FOR_VALUE_PARAMETER, parameter, i);
                 AnnotationCodegen.forParameter(i, mv, typeMapper).genAnnotations(parameter, parameterSignature.getAsmType());
             }
+            else if (kind == JvmMethodParameterKind.RECEIVER) {
+                AnnotationCodegen annotationCodegen = AnnotationCodegen.forParameter(i, mv, typeMapper);
+                Annotated targetedAnnotations = new AnnotatedWithAdditionalAnnotations(null, functionDescriptor);
+                annotationCodegen.genAnnotations(targetedAnnotations, parameterSignature.getAsmType(), RECEIVER);
+            }
         }
     }
 
