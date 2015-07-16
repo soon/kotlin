@@ -55,6 +55,11 @@ ref
     val private
     val protected
     val internal
+    val field
+    val property
+    val receiver
+    val param
+    val sparam
       get() = a
       set(S : s) {}
 
@@ -83,6 +88,11 @@ ref
     fun private   () : private
     fun protected () : protected
     fun internal  () : internal
+    fun field  () : field
+    fun property  () : property
+    fun receiver  () : receiver
+    fun param  () : param
+    fun sparam  () : sparam
 
     fun test(
         abstract  : t,
@@ -108,6 +118,11 @@ ref
         private   : t,
         protected : t,
         internal  : t,
+        field     : t,
+        property  : t,
+        receiver  : t,
+        param     : t,
+        sparam    : t,
     public protected private internal abstract
     open
     enum
@@ -150,6 +165,11 @@ class F(val foo : bar,
         private   : t,
         protected : t,
         internal  : t,
+        field     : t,
+        property  : t,
+        receiver  : t,
+        param     : t,
+        sparam    : t,
     public protected private internal abstract
     open
     enum
