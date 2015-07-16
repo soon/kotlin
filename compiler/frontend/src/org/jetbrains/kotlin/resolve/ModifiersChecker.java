@@ -311,6 +311,13 @@ public class ModifiersChecker {
                 case FIELD:
                     checkFieldTargetApplicability(modifierListOwner, descriptor, annotation);
                     break;
+                case PROPERTY_GETTER:
+                    reportIfNotPropertyDescriptor(descriptor, annotation, INAPPLICABLE_GET_TARGET);
+                    break;
+                case PROPERTY_SETTER: {
+                    reportIfNotMutableProperty(descriptor, annotation, INAPPLICABLE_SET_TARGET);
+                    break;
+                }
                 case FILE:
                     throw new IllegalArgumentException("@file annotations are not allowed here");
             }
@@ -329,6 +336,20 @@ public class ModifiersChecker {
 
         if (!hasDelegate && Boolean.FALSE.equals(trace.getBindingContext().get(BACKING_FIELD_REQUIRED, propertyDescriptor))) {
             reportAnnotationTargetNotApplicable(annotation, INAPPLICABLE_FIELD_TARGET_NO_BACKING_FIELD);
+        }
+    }
+
+    private void reportIfNotMutableProperty(
+            DeclarationDescriptor descriptor,
+            AnnotationDescriptor annotation,
+            DiagnosticFactory0<PsiElement> diagnosticFactory
+    ) {
+        reportIfNotPropertyDescriptor(descriptor, annotation, diagnosticFactory);
+
+        if (descriptor instanceof PropertyDescriptor) {
+            if (!((PropertyDescriptor) descriptor).isVar()) {
+                reportAnnotationTargetNotApplicable(annotation, INAPPLICABLE_TARGET_PROPERTY_IMMUTABLE);
+            }
         }
     }
 
