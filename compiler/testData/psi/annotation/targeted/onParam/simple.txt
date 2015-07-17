@@ -47,16 +47,26 @@ JetFile: simple.kt
         PsiElement(LPAR)('(')
         VALUE_PARAMETER
           MODIFIER_LIST
-            ANNOTATION_ENTRY
+            ANNOTATION
               PsiElement(AT)('@')
               ANNOTATION_TARGET
                 PsiElement(param)('param')
               PsiElement(COLON)(':')
-              CONSTRUCTOR_CALLEE
-                TYPE_REFERENCE
-                  USER_TYPE
-                    REFERENCE_EXPRESSION
-                      PsiElement(IDENTIFIER)('Ann')
+              PsiElement(LBRACKET)('[')
+              ANNOTATION_ENTRY
+                CONSTRUCTOR_CALLEE
+                  TYPE_REFERENCE
+                    USER_TYPE
+                      REFERENCE_EXPRESSION
+                        PsiElement(IDENTIFIER)('Ann')
+              PsiWhiteSpace(' ')
+              ANNOTATION_ENTRY
+                CONSTRUCTOR_CALLEE
+                  TYPE_REFERENCE
+                    USER_TYPE
+                      REFERENCE_EXPRESSION
+                        PsiElement(IDENTIFIER)('Ann2')
+              PsiElement(RBRACKET)(']')
           PsiWhiteSpace(' ')
           PsiElement(val)('val')
           PsiWhiteSpace(' ')

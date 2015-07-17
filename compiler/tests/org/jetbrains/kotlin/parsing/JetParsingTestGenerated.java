@@ -1027,6 +1027,12 @@ public class JetParsingTestGenerated extends AbstractJetParsingTest {
                         JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/psi/annotation/targeted/onParam"), Pattern.compile("^(.*)\\.kts?$"), true);
                     }
 
+                    @TestMetadata("modifiers.kt")
+                    public void testModifiers() throws Exception {
+                        String fileName = JetTestUtils.navigationMetadata("compiler/testData/psi/annotation/targeted/onParam/modifiers.kt");
+                        doParsingTest(fileName);
+                    }
+
                     @TestMetadata("recovery.kt")
                     public void testRecovery() throws Exception {
                         String fileName = JetTestUtils.navigationMetadata("compiler/testData/psi/annotation/targeted/onParam/recovery.kt");
