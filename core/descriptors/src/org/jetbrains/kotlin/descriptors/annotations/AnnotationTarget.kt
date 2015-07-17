@@ -54,15 +54,17 @@ public enum class AnnotationTarget(val description: String, val isDefault: Boole
 
         public val ALL_TARGET_SET: Set<AnnotationTarget> = values().toSet()
 
-        public val USE_SITE_MAPPING: Map<AnnotationUseSiteTarget, AnnotationTarget> = mapOf(
-                AnnotationUseSiteTarget.CONSTRUCTOR_PARAMETER to VALUE_PARAMETER,
-                AnnotationUseSiteTarget.FIELD to FIELD,
-                AnnotationUseSiteTarget.PROPERTY to PROPERTY,
-                AnnotationUseSiteTarget.FILE to FILE,
-                AnnotationUseSiteTarget.PROPERTY_GETTER to PROPERTY_GETTER,
-                AnnotationUseSiteTarget.PROPERTY_SETTER to PROPERTY_SETTER,
-                AnnotationUseSiteTarget.RECEIVER to VALUE_PARAMETER,
-                AnnotationUseSiteTarget.SETTER_PARAMETER to VALUE_PARAMETER)
+        public fun mapUseSiteTarget(target: AnnotationUseSiteTarget): List<AnnotationTarget> = USE_SITE_MAPPING[target] ?: listOf()
+
+        private val USE_SITE_MAPPING: Map<AnnotationUseSiteTarget, List<AnnotationTarget>> = mapOf(
+                AnnotationUseSiteTarget.CONSTRUCTOR_PARAMETER to listOf(VALUE_PARAMETER, PROPERTY),
+                AnnotationUseSiteTarget.FIELD to listOf(FIELD),
+                AnnotationUseSiteTarget.PROPERTY to listOf(PROPERTY),
+                AnnotationUseSiteTarget.FILE to listOf(FILE),
+                AnnotationUseSiteTarget.PROPERTY_GETTER to listOf(PROPERTY_GETTER),
+                AnnotationUseSiteTarget.PROPERTY_SETTER to listOf(PROPERTY_SETTER),
+                AnnotationUseSiteTarget.RECEIVER to listOf(VALUE_PARAMETER),
+                AnnotationUseSiteTarget.SETTER_PARAMETER to listOf(VALUE_PARAMETER))
 
     }
 }

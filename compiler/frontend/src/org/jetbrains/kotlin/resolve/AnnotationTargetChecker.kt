@@ -35,8 +35,8 @@ import kotlin.annotation
 public object AnnotationTargetChecker {
 
     private val PROPERTY_EXTENDED_TARGETS = listOf(
-            AnnotationTarget.FIELD, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
-    private val PARAMETER_EXTENDED_TARGETS = PROPERTY_EXTENDED_TARGETS + AnnotationTarget.PROPERTY
+            AnnotationTarget.FIELD, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER, AnnotationTarget.VALUE_PARAMETER)
+    private val VALUE_PARAMETER_EXTENDED_TARGETS = PROPERTY_EXTENDED_TARGETS + AnnotationTarget.PROPERTY
 
     public fun check(annotated: JetAnnotated, trace: BindingTrace, descriptor: ClassDescriptor? = null) {
         if (annotated is JetTypeParameter) return // TODO: support type parameter annotations
@@ -95,14 +95,14 @@ public object AnnotationTargetChecker {
 
     private fun checkAnnotationEntry(entry: JetAnnotationEntry, actualTargets: ExtendedTargetList, trace: BindingTrace) {
         val possibleTargets = possibleTargetSet(entry, trace)
-        val target = entry.getUseSiteTarget()?.getAnnotationUseSiteTarget()
+        val useSiteTarget = entry.getUseSiteTarget()?.getAnnotationUseSiteTarget()
 
         if (actualTargets.base.any {
-            it in possibleTargets && (target == null || AnnotationTarget.USE_SITE_MAPPING[target] == it)
+            it in possibleTargets && (useSiteTarget == null || it in AnnotationTarget.mapUseSiteTarget(useSiteTarget))
         }) return
 
-        if (target != null && actualTargets.extended.any {
-            it in possibleTargets && AnnotationTarget.USE_SITE_MAPPING[target] == it
+        if (useSiteTarget != null && actualTargets.extended.any {
+            it in possibleTargets && it in AnnotationTarget.mapUseSiteTarget(useSiteTarget)
         }) return
 
         trace.report(Errors.WRONG_ANNOTATION_TARGET.on(entry, actualTargets.base.firstOrNull()?.description ?: "unidentified target"))
@@ -123,7 +123,7 @@ public object AnnotationTargetChecker {
             }
             is JetProperty -> targetList(PROPERTY_EXTENDED_TARGETS,
                                          if (annotated.isLocal()) AnnotationTarget.LOCAL_VARIABLE else AnnotationTarget.PROPERTY)
-            is JetParameter -> targetList(PARAMETER_EXTENDED_TARGETS,
+            is JetParameter -> targetList(VALUE_PARAMETER_EXTENDED_TARGETS,
                                           if (annotated.hasValOrVar()) AnnotationTarget.PROPERTY else AnnotationTarget.VALUE_PARAMETER)
             is JetConstructor<*> -> targetList(AnnotationTarget.CONSTRUCTOR)
             is JetFunction -> targetList(listOf(AnnotationTarget.VALUE_PARAMETER), AnnotationTarget.FUNCTION)
