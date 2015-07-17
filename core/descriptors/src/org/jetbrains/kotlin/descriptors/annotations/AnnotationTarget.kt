@@ -18,7 +18,6 @@ package org.jetbrains.kotlin.descriptors.annotations
 
 import java.util.*
 import kotlin.annotation
-import kotlin.reflect.jvm.internal.impl.descriptors.annotations
 
 // NOTE: this enum must have the same entries with kotlin.annotation.AnnotationTarget
 public enum class AnnotationTarget(val description: String, val isDefault: Boolean = true) {
