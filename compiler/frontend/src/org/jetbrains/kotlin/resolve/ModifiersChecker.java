@@ -149,7 +149,7 @@ public class ModifiersChecker {
             checkVarargsModifiers(modifierListOwner, descriptor);
         }
         checkPlatformNameApplicability(descriptor);
-        AnnotationUseSiteTargetChecker.INSTANCE$.check(trace, modifierListOwner, descriptor);
+        AnnotationUseSiteTargetChecker.INSTANCE$.check(modifierListOwner, descriptor, trace);
         runDeclarationCheckers(modifierListOwner, descriptor);
         AnnotationTargetChecker.INSTANCE$.check(modifierListOwner, trace,
                                                 descriptor instanceof ClassDescriptor ? (ClassDescriptor) descriptor : null);
@@ -165,7 +165,7 @@ public class ModifiersChecker {
         reportIllegalModalityModifiers(modifierListOwner);
         reportIllegalVisibilityModifiers(modifierListOwner);
         checkPlatformNameApplicability(descriptor);
-        AnnotationUseSiteTargetChecker.INSTANCE$.check(trace, modifierListOwner, descriptor);
+        AnnotationUseSiteTargetChecker.INSTANCE$.check(modifierListOwner, descriptor, trace);
         runDeclarationCheckers(modifierListOwner, descriptor);
         AnnotationTargetChecker.INSTANCE$.check(modifierListOwner, trace,
                                                 descriptor instanceof ClassDescriptor ? (ClassDescriptor) descriptor : null);
