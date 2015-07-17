@@ -18,6 +18,7 @@ package org.jetbrains.kotlin.descriptors.annotations
 
 import java.util.*
 import kotlin.annotation
+import kotlin.reflect.jvm.internal.impl.descriptors.annotations
 
 // NOTE: this enum must have the same entries with kotlin.annotation.AnnotationTarget
 public enum class AnnotationTarget(val description: String, val isDefault: Boolean = true) {
@@ -52,6 +53,16 @@ public enum class AnnotationTarget(val description: String, val isDefault: Boole
         public val DEFAULT_TARGET_SET: Set<AnnotationTarget> = values().filter { it.isDefault }.toSet()
 
         public val ALL_TARGET_SET: Set<AnnotationTarget> = values().toSet()
+
+        public val USE_SITE_MAPPING: Map<AnnotationUseSiteTarget, AnnotationTarget> = mapOf(
+                AnnotationUseSiteTarget.CONSTRUCTOR_PARAMETER to VALUE_PARAMETER,
+                AnnotationUseSiteTarget.FIELD to FIELD,
+                AnnotationUseSiteTarget.PROPERTY to PROPERTY,
+                AnnotationUseSiteTarget.FILE to FILE,
+                AnnotationUseSiteTarget.PROPERTY_GETTER to PROPERTY_GETTER,
+                AnnotationUseSiteTarget.PROPERTY_SETTER to PROPERTY_SETTER,
+                AnnotationUseSiteTarget.RECEIVER to VALUE_PARAMETER,
+                AnnotationUseSiteTarget.SETTER_PARAMETER to VALUE_PARAMETER)
 
     }
 }

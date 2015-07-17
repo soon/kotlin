@@ -34,6 +34,10 @@ import kotlin.annotation
 
 public object AnnotationTargetChecker {
 
+    private val PROPERTY_EXTENDED_TARGETS = listOf(
+            AnnotationTarget.FIELD, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
+    private val PARAMETER_EXTENDED_TARGETS = PROPERTY_EXTENDED_TARGETS + AnnotationTarget.PROPERTY
+
     public fun check(annotated: JetAnnotated, trace: BindingTrace, descriptor: ClassDescriptor? = null) {
         if (annotated is JetTypeParameter) return // TODO: support type parameter annotations
         val actualTargets = getActualTargetList(annotated, descriptor)
@@ -62,7 +66,7 @@ public object AnnotationTargetChecker {
 
     public fun checkExpression(expression: JetExpression, trace: BindingTrace) {
         for (entry in expression.getAnnotationEntries()) {
-            checkAnnotationEntry(entry, listOf(AnnotationTarget.EXPRESSION), trace)
+            checkAnnotationEntry(entry, targetList(AnnotationTarget.EXPRESSION), trace)
         }
         if (expression is JetFunctionLiteralExpression) {
             for (parameter in expression.getValueParameters()) {
@@ -89,37 +93,58 @@ public object AnnotationTargetChecker {
         return possibleTargetSet(classDescriptor) ?: AnnotationTarget.DEFAULT_TARGET_SET
     }
 
-    private fun checkAnnotationEntry(entry: JetAnnotationEntry, actualTargets: List<AnnotationTarget>, trace: BindingTrace) {
+    private fun checkAnnotationEntry(entry: JetAnnotationEntry, actualTargets: ExtendedTargetList, trace: BindingTrace) {
         val possibleTargets = possibleTargetSet(entry, trace)
-        if (actualTargets.any { it in possibleTargets }) return
-        trace.report(Errors.WRONG_ANNOTATION_TARGET.on(entry, actualTargets.firstOrNull()?.description ?: "unidentified target"))
+        val target = entry.getUseSiteTarget()?.getAnnotationUseSiteTarget()
+
+        if (actualTargets.base.any {
+            it in possibleTargets && (target == null || AnnotationTarget.USE_SITE_MAPPING[target] == it)
+        }) return
+
+        if (target != null && actualTargets.extended.any {
+            it in possibleTargets && AnnotationTarget.USE_SITE_MAPPING[target] == it
+        }) return
+
+        trace.report(Errors.WRONG_ANNOTATION_TARGET.on(entry, actualTargets.base.firstOrNull()?.description ?: "unidentified target"))
     }
 
-    private fun getActualTargetList(annotated: JetAnnotated, descriptor: ClassDescriptor?): List<AnnotationTarget> {
-        if (annotated is JetClassOrObject) {
-            if (annotated is JetEnumEntry) return listOf(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD)
-            return if (descriptor?.getKind() == ClassKind.ANNOTATION_CLASS) {
-                listOf(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.CLASSIFIER)
+    private fun getActualTargetList(annotated: JetAnnotated, descriptor: ClassDescriptor?): ExtendedTargetList {
+        return when (annotated) {
+            is JetClassOrObject -> {
+                if (annotated is JetEnumEntry) {
+                    targetList(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD)
+                }
+                else if (descriptor?.getKind() == ClassKind.ANNOTATION_CLASS) {
+                    targetList(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.CLASSIFIER)
+                }
+                else {
+                    targetList(AnnotationTarget.CLASSIFIER)
+                }
             }
-            else {
-                listOf(AnnotationTarget.CLASSIFIER)
+            is JetProperty -> targetList(PROPERTY_EXTENDED_TARGETS,
+                                         if (annotated.isLocal()) AnnotationTarget.LOCAL_VARIABLE else AnnotationTarget.PROPERTY)
+            is JetParameter -> targetList(PARAMETER_EXTENDED_TARGETS,
+                                          if (annotated.hasValOrVar()) AnnotationTarget.PROPERTY else AnnotationTarget.VALUE_PARAMETER)
+            is JetConstructor<*> -> targetList(AnnotationTarget.CONSTRUCTOR)
+            is JetFunction -> targetList(listOf(AnnotationTarget.VALUE_PARAMETER), AnnotationTarget.FUNCTION)
+            is JetPropertyAccessor -> {
+                targetList(if (annotated.isGetter()) AnnotationTarget.PROPERTY_GETTER else AnnotationTarget.PROPERTY_SETTER)
             }
+            is JetPackageDirective -> targetList(AnnotationTarget.PACKAGE)
+            is JetTypeReference -> targetList(AnnotationTarget.TYPE)
+            is JetFile -> targetList(AnnotationTarget.FILE)
+            is JetTypeParameter -> targetList(AnnotationTarget.TYPE_PARAMETER)
+            else -> targetList()
         }
-        if (annotated is JetProperty) {
-            return if (annotated.isLocal()) listOf(AnnotationTarget.LOCAL_VARIABLE) else listOf(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD)
-        }
-        if (annotated is JetParameter) {
-            return if (annotated.hasValOrVar()) listOf(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD) else listOf(AnnotationTarget.VALUE_PARAMETER)
-        }
-        if (annotated is JetConstructor<*>) return listOf(AnnotationTarget.CONSTRUCTOR)
-        if (annotated is JetFunction) return listOf(AnnotationTarget.FUNCTION)
-        if (annotated is JetPropertyAccessor) {
-            return if (annotated.isGetter()) listOf(AnnotationTarget.PROPERTY_GETTER) else listOf(AnnotationTarget.PROPERTY_SETTER)
-        }
-        if (annotated is JetPackageDirective) return listOf(AnnotationTarget.PACKAGE)
-        if (annotated is JetTypeReference) return listOf(AnnotationTarget.TYPE)
-        if (annotated is JetFile) return listOf(AnnotationTarget.FILE)
-        if (annotated is JetTypeParameter) return listOf(AnnotationTarget.TYPE_PARAMETER)
-        return listOf()
+    }
+
+    private class ExtendedTargetList(val base: List<AnnotationTarget>, val extended: List<AnnotationTarget>)
+
+    private fun targetList(vararg target: AnnotationTarget): ExtendedTargetList {
+        return ExtendedTargetList(listOf(*target), emptyList())
+    }
+
+    private fun targetList(extended: List<AnnotationTarget>, vararg target: AnnotationTarget): ExtendedTargetList {
+        return ExtendedTargetList(listOf(*target), extended)
     }
 }
