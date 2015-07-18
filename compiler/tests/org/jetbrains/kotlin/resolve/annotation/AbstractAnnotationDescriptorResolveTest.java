@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.analyzer.AnalysisResult;
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment;
 import org.jetbrains.kotlin.descriptors.*;
 import org.jetbrains.kotlin.descriptors.annotations.AnnotationDescriptor;
+import org.jetbrains.kotlin.descriptors.annotations.AnnotationUseSiteTarget;
 import org.jetbrains.kotlin.descriptors.annotations.AnnotationWithTarget;
 import org.jetbrains.kotlin.descriptors.annotations.Annotations;
 import org.jetbrains.kotlin.descriptors.impl.AnonymousFunctionDescriptor;
@@ -135,7 +136,9 @@ public abstract class AbstractAnnotationDescriptorResolveTest extends JetLiteFix
             }
         }, " ");
 
-        assertEquals(expectedAnnotation, actualAnnotation);
+        String expectedAnnotationWithTarget = "@" + AnnotationUseSiteTarget.FILE.getRenderName() + ":" + expectedAnnotation;
+
+        assertEquals(expectedAnnotationWithTarget, actualAnnotation);
     }
 
     private void checkAnnotationOnLocalDeclarations(String expectedAnnotation) {
