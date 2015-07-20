@@ -43,6 +43,7 @@ public class JsLibraryStdDetectionUtil {
         return getJsLibraryStdVersion(classes, false) != null;
     }
 
+    @Nullable
     private static String getJsLibraryStdVersion(@NotNull List<VirtualFile> classesRoots, boolean fixedJarName) {
         if (JavaRuntimeDetectionUtil.getJavaRuntimeVersion(classesRoots) != null) {
             // Prevent clashing with java runtime, in case when library collects all roots.
@@ -52,7 +53,7 @@ public class JsLibraryStdDetectionUtil {
         VirtualFile jar = fixedJarName ? LibraryUtils.getJarFile(classesRoots, PathUtil.JS_LIB_JAR_NAME) : getJsStdLibJar(classesRoots);
         if (jar == null) return null;
 
-        assert KotlinJavaScriptLibraryDetectionUtil.isKotlinJavaScriptLibrary(classesRoots) : "StdLib should also be detected as Kotlin/Javascript library";
+        // assert KotlinJavaScriptLibraryDetectionUtil.isKotlinJavaScriptLibrary(classesRoots) : "StdLib should also be detected as Kotlin/Javascript library";
 
         return JarUtil.getJarAttribute(VfsUtilCore.virtualToIoFile(jar), Attributes.Name.IMPLEMENTATION_VERSION);
     }
