@@ -26,6 +26,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.kotlin.utils.LibraryUtils;
 import org.jetbrains.kotlin.utils.PathUtil;
+import org.jetbrains.kotlin.utils.Profiler;
+import sun.misc.Perf;
 
 import java.io.File;
 import java.util.Arrays;
@@ -53,7 +55,10 @@ public class JsLibraryStdDetectionUtil {
         VirtualFile jar = fixedJarName ? LibraryUtils.getJarFile(classesRoots, PathUtil.JS_LIB_JAR_NAME) : getJsStdLibJar(classesRoots);
         if (jar == null) return null;
 
-        // assert KotlinJavaScriptLibraryDetectionUtil.isKotlinJavaScriptLibrary(classesRoots) : "StdLib should also be detected as Kotlin/Javascript library";
+        Profiler profiler = Profiler.create("Library Test: " + fixedJarName);
+        assert KotlinJavaScriptLibraryDetectionUtil.isKotlinJavaScriptLibrary(classesRoots) : "StdLib should also be detected as Kotlin/Javascript library";
+
+        profiler.end();
 
         return JarUtil.getJarAttribute(VfsUtilCore.virtualToIoFile(jar), Attributes.Name.IMPLEMENTATION_VERSION);
     }

@@ -212,7 +212,7 @@ private object KotlinResolveDataProvider {
     }
 
     fun analyze(project: Project, resolveSession: ResolveSessionForBodies, analyzableElement: JetElement): AnalysisResult {
-        val profiler = Profiler.create("KotlinResolveDataProvider.analyze: " + analyzableElement.hashCode())
+        val profiler = Profiler.create("KotlinResolveDataProvider.analyze: " + analyzableElement.hashCode() + " " + analyzableElement.javaClass)
         try {
             val module = resolveSession.getModuleDescriptor()
             if (analyzableElement is JetCodeFragment) {
