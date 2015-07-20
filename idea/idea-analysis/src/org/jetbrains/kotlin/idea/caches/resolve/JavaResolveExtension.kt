@@ -63,7 +63,7 @@ fun PsiField.getJavaFieldDescriptor(): PropertyDescriptor? {
     return JavaResolveExtension.getResolver(getProject(), this).resolveField(JavaFieldImpl(this))
 }
 
-fun PsiMember.getJavaMemberDescriptor(): DeclarationDescriptor? {
+public fun PsiMember.getJavaMemberDescriptor(): DeclarationDescriptor? {
     return when (this) {
         is PsiClass -> getJavaClassDescriptor()
         is PsiMethod -> getJavaMethodDescriptor()

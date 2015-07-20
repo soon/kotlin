@@ -120,8 +120,16 @@ public class DescriptorClassMember extends MemberChooserObjectBase implements Cl
         return new DescriptorClassMember(declaration, parent);
     }
 
+    @NotNull
     public DeclarationDescriptor getDescriptor() {
-        return ResolvePackage.resolveToDescriptor((JetDeclaration) myPsiElement);
+        if (myPsiElement instanceof JetDeclaration) {
+            return ResolvePackage.resolveToDescriptor((JetDeclaration) myPsiElement);
+        }
+
+        DeclarationDescriptor descriptor = ResolvePackage.getJavaMemberDescriptor((PsiMember) myPsiElement);
+        assert descriptor != null: "Null descriptor for: " + myPsiElement;
+
+        return descriptor;
     }
 
     @Override
