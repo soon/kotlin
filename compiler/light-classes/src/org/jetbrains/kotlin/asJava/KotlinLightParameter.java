@@ -119,6 +119,11 @@ public class KotlinLightParameter extends LightParameter implements KotlinLightE
         return declaration != null ? declaration.getContainingFile() : super.getContainingFile();
     }
 
+    @Override
+    public boolean isPhysical() {
+        return true;
+    }
+
     @NotNull
     @Override
     public Language getLanguage() {

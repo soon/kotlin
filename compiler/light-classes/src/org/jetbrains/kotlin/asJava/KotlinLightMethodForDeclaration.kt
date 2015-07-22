@@ -38,7 +38,6 @@ open public class KotlinLightMethodForDeclaration(
         private val origin: JetDeclaration,
         containingClass: PsiClass
 ): LightMethod(manager, delegate, containingClass), KotlinLightMethod {
-
     private val paramsList: CachedValue<PsiParameterList> by Delegates.blockingLazy {
         val cacheManager = CachedValuesManager.getManager(delegate.getProject())
         cacheManager.createCachedValue<PsiParameterList>({
@@ -118,6 +117,8 @@ open public class KotlinLightMethodForDeclaration(
     override fun processDeclarations(processor: PsiScopeProcessor, state: ResolveState, lastParent: PsiElement?, place: PsiElement): Boolean {
         return getTypeParameters().all { processor.execute(it, state) }
     }
+
+    override fun isPhysical(): Boolean = true
 
     override fun isEquivalentTo(another: PsiElement?): Boolean {
         if (another is KotlinLightMethod && origin == another.getOrigin() && delegate == another.getDelegate()) {

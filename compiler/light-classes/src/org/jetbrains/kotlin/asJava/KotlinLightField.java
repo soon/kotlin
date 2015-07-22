@@ -147,6 +147,11 @@ public abstract class KotlinLightField<T extends JetDeclaration, D extends PsiFi
     }
 
     @Override
+    public boolean isPhysical() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "KotlinLightField:" + getName();
     }

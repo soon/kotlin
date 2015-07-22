@@ -136,6 +136,11 @@ public class KotlinLightTypeParameter
         return JetLanguage.INSTANCE;
     }
 
+    @Override
+    public boolean isPhysical() {
+        return true;
+    }
+
     @NotNull
     @Override
     public SearchScope getUseScope() {

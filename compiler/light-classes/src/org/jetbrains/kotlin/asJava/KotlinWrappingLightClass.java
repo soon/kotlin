@@ -112,6 +112,11 @@ public abstract class KotlinWrappingLightClass extends AbstractLightClass implem
         return myInnersCache.findInnerClassByName(name, checkBases);
     }
 
+    @Override
+    public boolean isPhysical() {
+        return true;
+    }
+
     /**
      * @see org.jetbrains.kotlin.codegen.binding.CodegenBinding#ENUM_ENTRY_CLASS_NEED_SUBCLASS
       */
