@@ -9,54 +9,6 @@ public val currentThread: Thread
     get() = Thread.currentThread()
 
 /**
- * Exposes the name of this thread as a property.
- */
-deprecated("Remove import of koltin.concurrent.name to use synthetic extension property instead.")
-public var Thread.name: String
-    get() = getName()
-    set(value) {
-        setName(value)
-    }
-
-/**
- * Exposes the daemon flag of this thread as a property.
- * The Java Virtual Machine exits when the only threads running are all daemon threads.
- */
-deprecated("Use synthetic extension property isDaemon instead.", ReplaceWith("this.isDaemon"))
-public var Thread.daemon: Boolean
-    get() = isDaemon()
-    set(value) {
-        setDaemon(value)
-    }
-
-/**
- * Exposes the alive state of this thread as a property.
- */
-deprecated("Use synthetic extension property isAlive instead.", ReplaceWith("this.isAlive"))
-public val Thread.alive: Boolean
-    get() = isAlive()
-
-/**
- * Exposes the priority of this thread as a property.
- */
-deprecated("Remove import of koltin.concurrent.priority to use synthetic extension property instead.")
-public var Thread.priority: Int
-    get() = getPriority()
-    set(value) {
-        setPriority(value)
-    }
-
-/**
- * Exposes the context class loader of this thread as a property.
- */
-deprecated("Remove import of koltin.concurrent.contextClassLoader to use synthetic extension property instead.")
-public var Thread.contextClassLoader: ClassLoader?
-    get() = getContextClassLoader()
-    set(value) {
-        setContextClassLoader(value)
-    }
-
-/**
  * Creates a thread that runs the specified [block] of code.
  *
  * @param start if `true`, the thread is immediately started.
@@ -99,22 +51,4 @@ public fun thread(start: Boolean = true, daemon: Boolean = false, contextClassLo
 public inline fun <T: Any> ThreadLocal<T>.getOrSet(default: () -> T): T {
     // TODO: replace let with apply or touch
     return get() ?: default().let { set(it); it }
-}
-
-/**
- * Allows you to use the executor as a function to
- * execute the given block on the [Executor].
- */
-deprecated("Use Executor.execute(Runnable) instead.", ReplaceWith("execute(action)"))
-public fun Executor.invoke(action: () -> Unit) {
-    execute(action)
-}
-
-/**
- * Allows you to use the executor service as a function to
- * execute the given block on the [ExecutorService].
- */
-deprecated("Use ExecutorService.submit(Callable) instead.", ReplaceWith("submit(action)"))
-public fun <T> ExecutorService.invoke(action: () -> T): Future<T> {
-    return submit(action)
 }
