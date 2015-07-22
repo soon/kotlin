@@ -18,7 +18,6 @@ package org.jetbrains.kotlin.container
 
 import java.io.Closeable
 import java.io.PrintStream
-import java.io.Writer
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.lang.reflect.WildcardType
@@ -67,10 +66,16 @@ public class StorageComponentContainer(id: String) : ComponentContainer, Closeab
         val typeArguments = request.getActualTypeArguments()
         if (typeArguments.size() != 1) return null
         val iterableTypeArgument = typeArguments[0]
-        if (!(iterableTypeArgument is WildcardType)) return null
-        val upperBounds = iterableTypeArgument.getUpperBounds()
-        if (upperBounds.size() != 1) return null
-        val iterableType = upperBounds[0]
+        val iterableType = when (iterableTypeArgument) {
+            is WildcardType -> {
+                val upperBounds = iterableTypeArgument.getUpperBounds()
+                if (upperBounds.size() != 1) return null
+                upperBounds[0]
+            }
+            is Class<*> -> iterableTypeArgument
+            is ParameterizedType -> iterableTypeArgument
+            else -> return null
+        }
         return IterableDescriptor(componentStorage.resolveMultiple(iterableType, context))
     }
 
