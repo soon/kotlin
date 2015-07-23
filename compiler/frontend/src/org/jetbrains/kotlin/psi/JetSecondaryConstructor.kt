@@ -29,6 +29,8 @@ public class JetSecondaryConstructor : JetConstructor<JetSecondaryConstructor> {
 
     override fun getContainingClassOrObject() = getParent().getParent() as JetClassOrObject
 
+    override fun hasBlockBody() = getBodyExpression() != null
+
     override fun getBodyExpression() = findChildByClass(javaClass<JetBlockExpression>())
 
     override fun getConstructorKeyword() = notNullChild<PsiElement>(super.getConstructorKeyword())
