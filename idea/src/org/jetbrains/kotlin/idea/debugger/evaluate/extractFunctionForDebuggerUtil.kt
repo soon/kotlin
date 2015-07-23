@@ -208,6 +208,15 @@ private fun addDebugExpressionBeforeContextElement(codeFragment: JetCodeFragment
                 }
             }
         }
+        contextElement is JetPrimaryConstructor -> {
+            val classOrObject = contextElement.getContainingClassOrObject()
+            var classBody = classOrObject.getBody()
+            if (classBody == null) {
+                val newClass = psiFactory.createClass("class A {}")
+                classBody = classOrObject.add(newClass.getBody()!!) as JetClassBody
+            }
+            insertNewInitializer(classBody)
+        }
         contextElement is JetClassOrObject -> {
             insertNewInitializer(contextElement.getBody()!!)
         }

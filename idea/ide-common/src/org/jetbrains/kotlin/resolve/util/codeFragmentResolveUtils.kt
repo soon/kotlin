@@ -53,6 +53,12 @@ public fun JetCodeFragment.getScopeAndDataFlowForAnalyzeFragment(
     val dataFlowInfo: DataFlowInfo
 
     when (context) {
+        is JetPrimaryConstructor -> {
+            val descriptor = resolveSession.getClassDescriptor(context.getContainingClassOrObject()) as ClassDescriptorWithResolutionScopes
+
+            scopeForContextElement = descriptor.getScopeForInitializerResolution()
+            dataFlowInfo = DataFlowInfo.EMPTY
+        }
         is JetClassOrObject -> {
             val descriptor = resolveSession.getClassDescriptor(context) as ClassDescriptorWithResolutionScopes
 
