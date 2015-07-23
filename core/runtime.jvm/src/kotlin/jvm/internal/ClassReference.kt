@@ -33,5 +33,11 @@ public class ClassReference(override val jClass: Class<*>) : KClass<Any>, Declar
     override val constructors: Collection<KFunction<Any>>
         get() = error()
 
+    override val annotations: List<Annotation>
+        get() = error()
+
+    override val objectInstance: Any?
+        get() = error()
+
     private fun error(): Nothing = throw KotlinReflectionNotSupportedError()
 }
