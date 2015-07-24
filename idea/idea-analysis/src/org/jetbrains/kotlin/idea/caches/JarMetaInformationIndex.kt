@@ -17,7 +17,6 @@
 package org.jetbrains.kotlin.idea.caches
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.ApplicationComponent
 import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.roots.OrderRootType
 import com.intellij.openapi.util.Key
@@ -26,16 +25,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.containers.HashSet
 import com.intellij.util.indexing.*
 import com.intellij.util.io.ExternalIntegerKeyDescriptor
-import com.intellij.util.io.KeyDescriptor
 import org.jetbrains.kotlin.idea.decompiler.isKotlinJvmCompiledFile
-import org.jetbrains.kotlin.load.java.AbiVersionUtil
-import org.jetbrains.kotlin.load.java.JvmAnnotationNames
-import org.jetbrains.org.objectweb.asm.AnnotationVisitor
-import org.jetbrains.org.objectweb.asm.ClassReader
-import org.jetbrains.org.objectweb.asm.ClassVisitor
-import org.jetbrains.org.objectweb.asm.Opcodes
 import java.util.ArrayList
-import kotlin.reflect.jvm.java
 
 public object JarMetaInformationIndex : ScalarIndexExtension<Int>() {
     override fun dependsOnFileContent(): Boolean = true

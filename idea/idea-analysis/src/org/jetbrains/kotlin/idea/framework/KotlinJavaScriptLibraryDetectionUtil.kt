@@ -19,8 +19,11 @@ package org.jetbrains.kotlin.idea.framework
 
 import com.intellij.openapi.roots.OrderRootType
 import com.intellij.openapi.roots.libraries.Library
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
+import org.jetbrains.kotlin.idea.caches.JarMetaInformationIndex
+import org.jetbrains.kotlin.idea.decompiler.isKotlinJvmCompiledFile
 import org.jetbrains.kotlin.js.JavaScript
 import org.jetbrains.kotlin.utils.KotlinJavascriptMetadataUtils
 import kotlin.platform.platformStatic
@@ -43,4 +46,30 @@ public object KotlinJavaScriptLibraryDetectionUtil {
             !file.isDirectory() &&
             JavaScript.EXTENSION == file.getExtension() &&
             KotlinJavascriptMetadataUtils.hasMetadata(String(file.contentsToByteArray(false)))
+
+    public object KotlinJarJavascriptInfoIndex: JarMetaInformationIndex.JarInformationCollector<HasCompiledKotlinInJar.JarKotlinState> {
+        public enum class JarKotlinState {
+            HAS_KOTLIN,
+            NO_KOTLIN,
+            COUNTING
+        }
+
+        init {
+            // TODO: bad - escaping this
+            JarMetaInformationIndex.register(this)
+        }
+
+        override val key = Key.create<HasCompiledKotlinInJar.JarKotlinState>(HasCompiledKotlinInJar::class.simpleName!!)
+        override val init = JarKotlinState.COUNTING
+        override val stopAt = JarKotlinState.HAS_KOTLIN
+
+        override fun count(result: JarKotlinState, nextFile: VirtualFile): JarKotlinState {
+            if (result == JarKotlinState.HAS_KOTLIN) return JarKotlinState.HAS_KOTLIN
+
+            return if (isKotlinJvmCompiledFile(nextFile)) JarKotlinState.HAS_KOTLIN else JarKotlinState.NO_KOTLIN
+        }
+
+        override fun countForSdkJar(file: VirtualFile): JarKotlinState = JarKotlinState.NO_KOTLIN
+    }
+
 }
