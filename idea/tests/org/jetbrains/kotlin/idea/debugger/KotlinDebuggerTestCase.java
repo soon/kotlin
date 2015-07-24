@@ -91,6 +91,9 @@ public abstract class KotlinDebuggerTestCase extends DescriptorTestCase {
                         configureCustomLibrary(model, customLibrarySources);
 
                         model.commit();
+
+                        VirtualFile file = VfsUtil.findFileByIoFile(new File(PluginTestCaseBase.getTestDataPathBase() + "/debugger/tinyApp/src"), false);
+                        VfsUtil.markDirtyAndRefresh(false, true, true, file);
                     }
                 });
             }
