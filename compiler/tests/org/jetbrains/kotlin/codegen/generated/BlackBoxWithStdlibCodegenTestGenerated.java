@@ -2767,6 +2767,45 @@ public class BlackBoxWithStdlibCodegenTestGenerated extends AbstractBlackBoxCode
             JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/codegen/boxWithStdlib/reflection"), Pattern.compile("^(.+)\\.kt$"), true);
         }
 
+        @TestMetadata("compiler/testData/codegen/boxWithStdlib/reflection/annotations")
+        @TestDataPath("$PROJECT_ROOT")
+        @RunWith(JUnit3RunnerWithInners.class)
+        public static class Annotations extends AbstractBlackBoxCodegenTest {
+            public void testAllFilesPresentInAnnotations() throws Exception {
+                JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/codegen/boxWithStdlib/reflection/annotations"), Pattern.compile("^(.+)\\.kt$"), true);
+            }
+
+            @TestMetadata("annotationRetentionAnnotation.kt")
+            public void testAnnotationRetentionAnnotation() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxWithStdlib/reflection/annotations/annotationRetentionAnnotation.kt");
+                doTestWithStdlib(fileName);
+            }
+
+            @TestMetadata("retentions.kt")
+            public void testRetentions() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxWithStdlib/reflection/annotations/retentions.kt");
+                doTestWithStdlib(fileName);
+            }
+
+            @TestMetadata("simpleClassAnnotation.kt")
+            public void testSimpleClassAnnotation() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxWithStdlib/reflection/annotations/simpleClassAnnotation.kt");
+                doTestWithStdlib(fileName);
+            }
+
+            @TestMetadata("simpleFunAnnotation.kt")
+            public void testSimpleFunAnnotation() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxWithStdlib/reflection/annotations/simpleFunAnnotation.kt");
+                doTestWithStdlib(fileName);
+            }
+
+            @TestMetadata("simpleValAnnotation.kt")
+            public void testSimpleValAnnotation() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxWithStdlib/reflection/annotations/simpleValAnnotation.kt");
+                doTestWithStdlib(fileName);
+            }
+        }
+
         @TestMetadata("compiler/testData/codegen/boxWithStdlib/reflection/call")
         @TestDataPath("$PROJECT_ROOT")
         @RunWith(JUnit3RunnerWithInners.class)
