@@ -17,10 +17,12 @@
 package org.jetbrains.kotlin.resolve.util
 
 import org.jetbrains.kotlin.descriptors.ClassDescriptorWithResolutionScopes
+import org.jetbrains.kotlin.descriptors.ConstructorDescriptor
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.parents
 import org.jetbrains.kotlin.psi.psiUtil.siblings
 import org.jetbrains.kotlin.resolve.BindingContext
+import org.jetbrains.kotlin.resolve.FunctionDescriptorUtil
 import org.jetbrains.kotlin.resolve.bindingContextUtil.getDataFlowInfo
 import org.jetbrains.kotlin.resolve.calls.smartcasts.DataFlowInfo
 import org.jetbrains.kotlin.resolve.lazy.KotlinCodeAnalyzer
@@ -31,9 +33,7 @@ import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
 //TODO: this code should be moved into debugger which should set correct context for its code fragment
 private fun JetExpression.correctContextForExpression(): JetExpression {
     return when (this) {
-        is JetProperty -> this.getDelegateExpressionOrInitializer()
         is JetFunctionLiteral -> this.getBodyExpression()?.getStatements()?.lastOrNull()
-        is JetDeclarationWithBody -> this.getBodyExpression()
         is JetBlockExpression -> this.getStatements().lastOrNull()
         else -> {
             val previousExpression = this.siblings(forward = false, withItself = false).firstIsInstanceOrNull<JetExpression>()
@@ -65,20 +65,32 @@ public fun JetCodeFragment.getScopeAndDataFlowForAnalyzeFragment(
     val scopeForContextElement: JetScope?
     val dataFlowInfo: DataFlowInfo
 
-    when (context) {
-        is JetPrimaryConstructor -> {
+    when {
+        context is JetPrimaryConstructor -> {
             val descriptor = resolveSession.getClassDescriptor(context.getContainingClassOrObject()) as ClassDescriptorWithResolutionScopes
 
             scopeForContextElement = descriptor.getScopeForInitializerResolution()
             dataFlowInfo = DataFlowInfo.EMPTY
         }
-        is JetClassOrObject -> {
+        context is JetSecondaryConstructor -> {
+            val correctedContext = context.getDelegationCall().calleeExpression!!
+
+            val contextForElement = resolveToElement(correctedContext)
+
+            scopeForContextElement = contextForElement[BindingContext.RESOLUTION_SCOPE, correctedContext]
+            dataFlowInfo = DataFlowInfo.EMPTY
+        }
+        context is JetClassOrObject -> {
             val descriptor = resolveSession.getClassDescriptor(context) as ClassDescriptorWithResolutionScopes
 
             scopeForContextElement = descriptor.getScopeForMemberDeclarationResolution()
             dataFlowInfo = DataFlowInfo.EMPTY
         }
-        is JetExpression -> {
+        context is JetDeclaration && !JetPsiUtil.isLocal(context)-> {
+            scopeForContextElement = resolveSession.getDeclarationScopeProvider().getResolutionScopeForDeclaration(context)
+            dataFlowInfo = DataFlowInfo.EMPTY
+        }
+        context is JetExpression -> {
             val correctedContext = context.correctContextForExpression()
 
             val contextForElement = resolveToElement(correctedContext)
@@ -86,7 +98,7 @@ public fun JetCodeFragment.getScopeAndDataFlowForAnalyzeFragment(
             scopeForContextElement = contextForElement[BindingContext.RESOLUTION_SCOPE, correctedContext]
             dataFlowInfo = contextForElement.getDataFlowInfo(correctedContext)
         }
-        is JetFile -> {
+        context is JetFile -> {
             scopeForContextElement = resolveSession.getFileScopeProvider().getFileScope(context)
             dataFlowInfo = DataFlowInfo.EMPTY
         }

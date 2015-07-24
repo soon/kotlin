@@ -224,6 +224,11 @@ private fun addDebugExpressionBeforeContextElement(codeFragment: JetCodeFragment
             val block = contextElement.getBodyExpression()!!
             block.getStatements().firstOrNull() ?: block.getLastChild()
         }
+        contextElement is JetDeclarationWithBody && !contextElement.hasBody()-> {
+            val block = psiFactory.createBlock("")
+            val newBlock = contextElement.add(block) as JetBlockExpression
+            newBlock.getRBrace()
+        }
         contextElement is JetDeclarationWithBody && !contextElement.hasBlockBody()-> {
             wrapInRunFun(contextElement.getBodyExpression()!!)
         }

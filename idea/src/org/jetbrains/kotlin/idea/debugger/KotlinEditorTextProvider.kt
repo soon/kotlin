@@ -61,15 +61,21 @@ class KotlinEditorTextProvider : EditorTextProvider {
             val jetElement = PsiTreeUtil.getParentOfType(element, javaClass<JetElement>())
             if (jetElement == null) return null
 
-            if (jetElement is JetProperty) {
-                val nameIdentifier = jetElement.getNameIdentifier()
-                if (nameIdentifier == element) {
-                    return jetElement
+            when (jetElement) {
+                is JetDeclarationWithBody -> {
+                    if (jetElement.hasBody()) {
+                        return jetElement.bodyExpression
+                    }
                 }
-            }
-
-            if (jetElement is JetWhenEntry) {
-                return jetElement.expression
+                is JetProperty -> {
+                    val nameIdentifier = jetElement.getNameIdentifier()
+                    if (nameIdentifier == element) {
+                        return jetElement
+                    }
+                }
+                is JetWhenEntry -> {
+                    return jetElement.expression
+                }
             }
 
             val parent = jetElement.getParent()
