@@ -141,12 +141,12 @@ class KotlinCodeFragmentFactory: CodeFragmentFactory() {
             val containingFile = elementAt.getContainingFile()
             if (containingFile !is JetFile) return null
 
-            val expressionAtOffset = PsiTreeUtil.findElementOfClassAtOffset(containingFile, elementAt.getTextOffset(), javaClass<JetExpression>(), false)
+            val expressionAtOffset = KotlinEditorTextProvider.findExpressionInner(elementAt, true)
             if (expressionAtOffset != null && KotlinEditorTextProvider.isAcceptedAsCodeFragmentContext(elementAt)) {
                 return expressionAtOffset
             }
 
-            return KotlinEditorTextProvider.findExpressionInner(elementAt, true) ?: containingFile
+            return PsiTreeUtil.findElementOfClassAtOffset(containingFile, elementAt.getTextOffset(), javaClass<JetExpression>(), false) ?: containingFile
         }
 
         //internal for tests

@@ -68,6 +68,10 @@ class KotlinEditorTextProvider : EditorTextProvider {
                 }
             }
 
+            if (jetElement is JetWhenEntry) {
+                return jetElement.expression
+            }
+
             val parent = jetElement.getParent()
             if (parent == null) return null
 

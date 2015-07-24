@@ -3,7 +3,7 @@ fun main(args: Array<String>) {
 
     when(str) {
         null -> test("")
-        else -> <caret>test(str)
+        <caret>else -> test(str)
     }
 }
 

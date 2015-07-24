@@ -36,8 +36,21 @@ private fun JetExpression.correctContextForExpression(): JetExpression {
         is JetDeclarationWithBody -> this.getBodyExpression()
         is JetBlockExpression -> this.getStatements().lastOrNull()
         else -> {
-            this.siblings(forward = false, withItself = false).firstIsInstanceOrNull<JetExpression>()
-                    ?: this.parents.firstIsInstanceOrNull<JetExpression>()
+            val previousExpression = this.siblings(forward = false, withItself = false).firstIsInstanceOrNull<JetExpression>()
+            if (previousExpression != null) {
+                previousExpression
+            }
+            else {
+                for (parent in parents) {
+                    if (parent is JetWhenEntry || parent is JetIfExpression) {
+                        return this
+                    }
+                    if (parent is JetExpression) {
+                        return parent
+                    }
+                }
+                this
+            }
         }
     } ?: this
 }
