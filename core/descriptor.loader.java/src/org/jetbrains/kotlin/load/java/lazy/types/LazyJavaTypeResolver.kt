@@ -41,6 +41,7 @@ import org.jetbrains.kotlin.types.Variance.INVARIANT
 import org.jetbrains.kotlin.types.Variance.IN_VARIANCE
 import org.jetbrains.kotlin.types.Variance.OUT_VARIANCE
 import org.jetbrains.kotlin.types.checker.JetTypeChecker
+import org.jetbrains.kotlin.types.typeUtil.isDefaultBound
 import org.jetbrains.kotlin.types.typeUtil.replaceAnnotations
 import org.jetbrains.kotlin.utils.sure
 import java.util.HashSet
@@ -207,7 +208,6 @@ class LazyJavaTypeResolver(
             if (isRaw()) {
                 return typeParameters.map {
                     parameter ->
-
                     if (attr.howThisTypeIsUsed == UPPER_BOUND) {
                         // not making a star projection because of this case:
                         // Java:
@@ -218,8 +218,27 @@ class LazyJavaTypeResolver(
                         val projectionKind = if (parameter.getVariance() == OUT_VARIANCE) INVARIANT else OUT_VARIANCE
                         TypeProjectionImpl(projectionKind, c.module.builtIns.getNullableAnyType())
                     }
-                    else
-                        makeStarProjection(parameter, attr)
+                    else when (attr.flexibility) {
+                        // Raw(List<T>) => (List<Any?>..List<*>)
+                        // Raw(Enum<T>) => (Enum<Enum<*>>..Enum<out Enum<*>>)
+                        // In the last case upper bound is equal to star projection `Enum<*>`,
+                        // but we want to keep matching tree structure of flexible bounds (at least they should have the same size)
+                        FLEXIBLE_LOWER_BOUND -> TypeProjectionImpl(
+                            // T : String -> String
+                            // T : Enum<T> -> Enum<*>
+                            Variance.INVARIANT, parameter.getErasedUpperBound()
+                        )
+                        FLEXIBLE_UPPER_BOUND, INFLEXIBLE -> {
+                            val erasedUpperBound = parameter.getErasedUpperBound()
+
+                            if (erasedUpperBound.constructor.parameters.isNotEmpty())
+                                // T : Enum<E> -> out Enum<*>
+                                TypeProjectionImpl(Variance.OUT_VARIANCE, erasedUpperBound)
+                            else
+                                // T : String -> *
+                                makeStarProjection(parameter, attr)
+                        }
+                    }
                 }
             }
             if (isConstructorTypeParameter()) {
@@ -268,10 +287,55 @@ class LazyJavaTypeResolver(
 
             if (descriptor is TypeParameterDescriptor) return descriptor.getDefaultType().getMemberScope()
 
-            return (descriptor as ClassDescriptor).getMemberScope(getArguments())
+             return (descriptor as ClassDescriptor).getMemberScope(substitution)
         }
 
-        override fun computeCustomSubstitution(): TypeSubstitution? = null
+        override fun computeCustomSubstitution() = if (isRaw()) RawSubstitution else null
+
+        private object RawSubstitution : TypeSubstitution() {
+            override fun get(key: JetType) = TypeProjectionImpl(eraseType(key))
+
+            private fun eraseType(type: JetType): JetType {
+                val declaration = type.constructor.declarationDescriptor
+                return when (declaration) {
+                    is TypeParameterDescriptor -> eraseType(declaration.getErasedUpperBound())
+                    is ClassDescriptor -> {
+                        val lower = type.lowerIfFlexible()
+                        val upper = type.upperIfFlexible()
+                        FlexibleJavaClassifierTypeCapabilities.create(
+                            eraseInflexibleBasedOnClassDescriptor(lower, declaration, Variance.INVARIANT),
+                            eraseInflexibleBasedOnClassDescriptor(upper, declaration, Variance.OUT_VARIANCE)
+                        )
+                    }
+                    else -> error("Unexpected declaration kind: $declaration")
+                }
+            }
+
+            private fun eraseInflexibleBasedOnClassDescriptor(type: JetType, declaration: ClassDescriptor, variance: Variance): JetType {
+                if (KotlinBuiltIns.isArray(type)) {
+                    val componentTypeProjection = type.arguments[0]
+                    val arguments = listOf(
+                        TypeProjectionImpl(componentTypeProjection.projectionKind, eraseType(componentTypeProjection.type))
+                    )
+                    return JetTypeImpl(
+                        type.annotations, type.constructor, type.isMarkedNullable, arguments,
+                        (type.constructor.declarationDescriptor as ClassDescriptor).getMemberScope(arguments)
+                    )
+                }
+
+                val constructor = type.constructor
+                return JetTypeImpl(
+                    type.annotations, constructor, type.isMarkedNullable,
+                    type.mapArgumentsPreservingDefaultBounds {
+                        parameter -> TypeProjectionImpl(variance, parameter.getErasedUpperBound())
+                    },
+                    RawSubstitution,
+                    declaration.getMemberScope(RawSubstitution)
+                )
+            }
+
+            override fun isEmpty() = false
+        }
 
         private val nullable = c.storageManager.createLazyValue l@ {
             when (attr.flexibility) {
@@ -406,3 +470,60 @@ fun JavaTypeAttributes.toFlexible(flexibility: JavaTypeFlexibility) =
         object : JavaTypeAttributes by this {
             override val flexibility = flexibility
         }
+
+private fun TypeParameterDescriptor.getErasedUpperBound(): JetType {
+    val firstUpperBound = upperBounds.first()
+
+    if (firstUpperBound.constructor.declarationDescriptor is ClassDescriptor) {
+        return firstUpperBound.eraseArguments()
+    }
+
+    val visited = linkedSetOf<TypeConstructor>()
+
+    var current = firstUpperBound.constructor.declarationDescriptor as TypeParameterDescriptor
+
+    do {
+        visited.add(current.typeConstructor)
+
+        val nextUpperBound = current.upperBounds.first()
+        if (nextUpperBound.constructor.declarationDescriptor is ClassDescriptor) return nextUpperBound.eraseArguments()
+        current = nextUpperBound.constructor.declarationDescriptor as TypeParameterDescriptor
+
+    } while (current.typeConstructor !in visited)
+
+    return ErrorUtils.createErrorType("Can't compute erased upper bound of type parameter `$this`")
+}
+
+private fun JetType.eraseArguments(): JetType {
+    if (constructor.parameters.isEmpty() || constructor.declarationDescriptor == null) return this
+
+    // We could just create JetTypeImpl with current type constructor and star projections,
+    // but we want to preserve flexibility of type, and that it what TypeSubstitutor does
+    return TypeSubstitutor.create(ConstantStarSubstitution).substitute(this, Variance.INVARIANT)!!
+}
+
+private object ConstantStarSubstitution : TypeSubstitution() {
+    override fun get(key: JetType): TypeProjection? {
+        // Let substitutor deal with flexibility
+        if (key.isFlexible()) return null
+
+        val newProjections = key.mapArgumentsPreservingDefaultBounds(::StarProjectionImpl)
+
+        val substitution = IndexedParametersSubstitution(key.constructor, newProjections)
+
+        return TypeProjectionImpl(
+                TypeSubstitutor.create(substitution).substitute(key.constructor.declarationDescriptor!!.defaultType, Variance.INVARIANT)!!
+        )
+    }
+
+    override fun isEmpty() = false
+}
+
+// We must preserve `out Any?` projections, otherwise it could lead to inconsistency when upper bound of type parameter is a raw
+// See `starProjectionToRaw` test and LazyJavaClassifierType.computeArguments for clarification
+inline private fun JetType.mapArgumentsPreservingDefaultBounds(projection: (TypeParameterDescriptor) -> TypeProjection)
+    = constructor.parameters.map {
+        parameter ->
+        arguments[parameter.index].defaultBoundOr { projection(parameter) }
+    }
+inline private fun TypeProjection.defaultBoundOr(projection: () -> TypeProjection) = if (type.isDefaultBound()) this else projection()
