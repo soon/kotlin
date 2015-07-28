@@ -140,3 +140,9 @@ public fun CallableDescriptor.getOwnerForEffectiveDispatchReceiverParameter(): D
     }
     return getDispatchReceiverParameter()?.getContainingDeclaration()
 }
+
+public val DeclarationDescriptor.parentsWithSelf: Sequence<DeclarationDescriptor>
+    get() = sequence(this, { it.containingDeclaration })
+
+public val DeclarationDescriptor.parents: Sequence<DeclarationDescriptor>
+    get() = parentsWithSelf.drop(1)

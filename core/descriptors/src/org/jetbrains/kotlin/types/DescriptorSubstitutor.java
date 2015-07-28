@@ -65,8 +65,8 @@ public class DescriptorSubstitutor {
             }
         });
 
-        Map<TypeParameterDescriptor, TypeParameterDescriptorImpl> substitutedMap =
-                new HashMap<TypeParameterDescriptor, TypeParameterDescriptorImpl>();
+        Map<TypeParameterDescriptor, TypeParameterDescriptorImpl> substitutedMap = new HashMap<TypeParameterDescriptor, TypeParameterDescriptorImpl>();
+        int index = 0;
         for (TypeParameterDescriptor descriptor : typeParameters) {
             TypeParameterDescriptorImpl substituted = TypeParameterDescriptorImpl.createForFurtherModification(
                     newContainingDeclaration,
@@ -74,7 +74,7 @@ public class DescriptorSubstitutor {
                     descriptor.isReified(),
                     descriptor.getVariance(),
                     descriptor.getName(),
-                    descriptor.getIndex(),
+                    index++,
                     SourceElement.NO_SOURCE
             );
             substituted.setInitialized();
