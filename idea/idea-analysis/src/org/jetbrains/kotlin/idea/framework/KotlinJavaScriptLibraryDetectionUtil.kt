@@ -47,29 +47,29 @@ public object KotlinJavaScriptLibraryDetectionUtil {
             JavaScript.EXTENSION == file.getExtension() &&
             KotlinJavascriptMetadataUtils.hasMetadata(String(file.contentsToByteArray(false)))
 
-    public object KotlinJarJavascriptInfoIndex: JarMetaInformationIndex.JarInformationCollector<HasCompiledKotlinInJar.JarKotlinState> {
-        public enum class JarKotlinState {
-            HAS_KOTLIN,
-            NO_KOTLIN,
-            COUNTING
-        }
-
-        init {
-            // TODO: bad - escaping this
-            JarMetaInformationIndex.register(this)
-        }
-
-        override val key = Key.create<HasCompiledKotlinInJar.JarKotlinState>(HasCompiledKotlinInJar::class.simpleName!!)
-        override val init = JarKotlinState.COUNTING
-        override val stopAt = JarKotlinState.HAS_KOTLIN
-
-        override fun count(result: JarKotlinState, nextFile: VirtualFile): JarKotlinState {
-            if (result == JarKotlinState.HAS_KOTLIN) return JarKotlinState.HAS_KOTLIN
-
-            return if (isKotlinJvmCompiledFile(nextFile)) JarKotlinState.HAS_KOTLIN else JarKotlinState.NO_KOTLIN
-        }
-
-        override fun countForSdkJar(file: VirtualFile): JarKotlinState = JarKotlinState.NO_KOTLIN
-    }
+//    public object KotlinJarJavascriptInfoIndex: JarMetaInformationIndex.JarInformationCollector<HasCompiledKotlinInJar.JarKotlinState> {
+//        public enum class JarKotlinState {
+//            HAS_KOTLIN,
+//            NO_KOTLIN,
+//            COUNTING
+//        }
+//
+//        init {
+//            // TODO: bad - escaping this
+//            JarMetaInformationIndex.register(this)
+//        }
+//
+//        override val key = Key.create<HasCompiledKotlinInJar.JarKotlinState>(HasCompiledKotlinInJar::class.simpleName!!)
+//        override val init = JarKotlinState.COUNTING
+//        override val stopAt = JarKotlinState.HAS_KOTLIN
+//
+//        override fun count(result: JarKotlinState, nextFile: VirtualFile): JarKotlinState {
+//            if (result == JarKotlinState.HAS_KOTLIN) return JarKotlinState.HAS_KOTLIN
+//
+//            return if (isKotlinJvmCompiledFile(nextFile)) JarKotlinState.HAS_KOTLIN else JarKotlinState.NO_KOTLIN
+//        }
+//
+//        override fun countForSdkJar(file: VirtualFile): JarKotlinState = JarKotlinState.NO_KOTLIN
+//    }
 
 }
