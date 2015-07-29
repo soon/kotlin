@@ -34,12 +34,12 @@ fun main(args: Array<String>) {
     val environment = KotlinCoreEnvironment.createForProduction(Disposable {  }, configuration, emptyList())
 
     val project = environment.project
-    val psiFileFactory = PsiFileFactory.getInstance(project)
+    val jetPsiFactory = JetPsiFactory(project)
     val fileType = JetFileType.INSTANCE
 
     FileTreeWalk(sourcePath).forEach { sourceFile ->
         if (sourceFile.isFile && sourceFile.extension == fileType.defaultExtension) {
-            val psiFile = psiFileFactory.createFileFromText(sourceFile.name, fileType, sourceFile.readText()) as JetFile
+            val psiFile = jetPsiFactory.createFile(sourceFile.name, sourceFile.readText())
             processDeclarations(sourceFile.name, psiFile.declarations)
         }
     }
