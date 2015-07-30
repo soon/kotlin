@@ -87,5 +87,6 @@ public annotation class target(vararg val allowedTargets: AnnotationTarget)
 target(AnnotationTarget.ANNOTATION_CLASS)
 public annotation(retention = AnnotationRetention.SOURCE) class annotation (
         val retention: AnnotationRetention = AnnotationRetention.RUNTIME,
-        val repeatable: Boolean = false
+        val repeatable: Boolean = false,
+        val mustBeDocumented: Boolean = false
 )
