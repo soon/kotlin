@@ -16,10 +16,7 @@
 
 package kotlin.reflect.jvm
 
-import java.lang.reflect.Constructor
-import java.lang.reflect.Field
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
+import java.lang.reflect.*
 import kotlin.jvm.internal.Intrinsic
 import kotlin.reflect.*
 import kotlin.reflect.jvm.internal.*
@@ -87,6 +84,15 @@ public val <T> KFunction<T>.javaConstructor: Constructor<T>?
         is KFunctionImpl -> (caller as? FunctionCaller.Constructor)?.constructor as? Constructor<T>
         else -> null
     }
+
+
+/**
+ * Returns a Java [Type] instance corresponding to the given Kotlin type,
+ * or `null` if this type can not be represented by a Java [Type].
+ */
+// TODO: document that it's not tied to the declaration (e.g. Unit -> Unit, not void)
+public val KType.javaType: Type?
+    get() = computeJavaType((this as KTypeImpl).type)
 
 
 
