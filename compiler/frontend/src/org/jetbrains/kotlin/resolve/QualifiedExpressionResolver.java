@@ -30,7 +30,7 @@ import org.jetbrains.kotlin.name.Name;
 import org.jetbrains.kotlin.psi.*;
 import org.jetbrains.kotlin.resolve.scopes.AbstractScopeAdapter;
 import org.jetbrains.kotlin.resolve.scopes.JetScope;
-import org.jetbrains.kotlin.resolve.scopes.UsageLocation;
+import org.jetbrains.kotlin.incremental.components.UsageLocation;
 import org.jetbrains.kotlin.resolve.scopes.receivers.ReceiverValue;
 import org.jetbrains.kotlin.resolve.validation.SymbolUsageValidator;
 

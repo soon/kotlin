@@ -26,7 +26,7 @@ import org.jetbrains.kotlin.psi.JetFile;
 import org.jetbrains.kotlin.renderer.DescriptorRenderer;
 import org.jetbrains.kotlin.resolve.lazy.KotlinTestWithEnvironment;
 import org.jetbrains.kotlin.resolve.lazy.LazyResolveTestUtil;
-import org.jetbrains.kotlin.resolve.scopes.UsageLocation;
+import org.jetbrains.kotlin.incremental.components.UsageLocation;
 import org.jetbrains.kotlin.test.ConfigurationKind;
 
 import java.util.Collection;

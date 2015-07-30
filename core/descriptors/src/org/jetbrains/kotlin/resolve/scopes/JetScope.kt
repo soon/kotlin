@@ -17,6 +17,7 @@
 package org.jetbrains.kotlin.resolve.scopes
 
 import org.jetbrains.kotlin.descriptors.*
+import org.jetbrains.kotlin.incremental.components.UsageLocation
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.types.JetType
 import org.jetbrains.kotlin.utils.Printer
@@ -244,8 +245,3 @@ public interface DescriptorKindExclude {
     }
 }
 
-public interface UsageLocation {
-    companion object {
-        val NO_LOCATION = object : UsageLocation {}
-    }
-}

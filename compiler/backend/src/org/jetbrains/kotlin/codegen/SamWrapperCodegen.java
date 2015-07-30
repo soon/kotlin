@@ -30,7 +30,7 @@ import org.jetbrains.kotlin.name.FqName;
 import org.jetbrains.kotlin.name.Name;
 import org.jetbrains.kotlin.psi.JetFile;
 import org.jetbrains.kotlin.resolve.DescriptorUtils;
-import org.jetbrains.kotlin.resolve.scopes.UsageLocation;
+import org.jetbrains.kotlin.incremental.components.UsageLocation;
 import org.jetbrains.kotlin.types.JetType;
 import org.jetbrains.kotlin.types.expressions.OperatorConventions;
 import org.jetbrains.org.objectweb.asm.MethodVisitor;

@@ -30,7 +30,7 @@ import org.jetbrains.kotlin.resolve.BindingContext;
 import org.jetbrains.kotlin.resolve.BindingTrace;
 import org.jetbrains.kotlin.resolve.lazy.descriptors.LazyPackageDescriptor;
 import org.jetbrains.kotlin.resolve.scopes.JetScope;
-import org.jetbrains.kotlin.resolve.scopes.UsageLocation;
+import org.jetbrains.kotlin.incremental.components.UsageLocation;
 import org.jetbrains.kotlin.storage.LockBasedLazyResolveStorageManager;
 
 import javax.inject.Inject;

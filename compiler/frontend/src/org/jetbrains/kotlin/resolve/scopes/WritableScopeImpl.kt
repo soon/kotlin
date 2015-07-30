@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.utils.Printer
 
 import java.util.*
 import com.intellij.util.SmartList
+import org.jetbrains.kotlin.incremental.components.UsageLocation
 import org.jetbrains.kotlin.util.collectionUtils.concatInOrder
 
 // Reads from:

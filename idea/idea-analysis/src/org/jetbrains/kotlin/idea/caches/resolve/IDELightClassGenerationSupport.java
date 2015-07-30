@@ -60,7 +60,7 @@ import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode;
 import org.jetbrains.kotlin.resolve.lazy.ForceResolveUtil;
 import org.jetbrains.kotlin.resolve.lazy.KotlinCodeAnalyzer;
 import org.jetbrains.kotlin.resolve.scopes.JetScope;
-import org.jetbrains.kotlin.resolve.scopes.UsageLocation;
+import org.jetbrains.kotlin.incremental.components.UsageLocation;
 
 import java.io.IOException;
 import java.util.*;
