@@ -23,7 +23,6 @@ import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.idea.JetFileType
 import org.jetbrains.kotlin.psi.*
-import org.jetbrains.kotlin.psi.stubs.elements.JetStubElementTypes
 import java.io.File
 
 
@@ -105,24 +104,6 @@ class EvaluatorVisitor(val evaluator: Evaluator) : JetTreeVisitorVoid() {
     }
 }
 
-
-fun processDeclarations(context: String, declarations: List<JetDeclaration>, evaluator: Evaluator) {
-    declarations.forEach { processDeclaration(context, it, evaluator) }
-}
-
-private fun processDeclaration(context: String, declaration: JetAnnotated, evaluator: Evaluator) {
-    val annotations = declaration.parseConditionalAnnotations()
-    val name = (declaration as? JetNamedDeclaration)?.nameAsSafeName ?: declaration.name
-    val conditionalResult = evaluator(annotations)
-    println("$context, declaration: ${declaration.javaClass.simpleName} $name, annotations: ${annotations.joinToString { it.toString() }}, evaluation result: $conditionalResult")
-    if (declaration is JetDeclarationContainer && conditionalResult) {
-        processDeclarations("${context.trimEnd('/')}/$name", declaration.declarations, evaluator)
-    }
-}
-
-
-//private fun JetAnnotated.getAnnotationEntry(name: String): JetAnnotationEntry? =
-//        annotationEntries.firstOrNull() { name == it.typeReferenceName }
 
 val JetAnnotationEntry.typeReferenceName: String? get() =
         (typeReference?.typeElement as? JetUserType)?.referencedName
