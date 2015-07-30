@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <component name="ArtifactManager">
   <artifact name="KotlinBarePlugin">
     <output-path>$PROJECT_DIR$/out/artifacts/BareKotlin</output-path>
@@ -17,6 +18,7 @@
           <element id="module-output" name="descriptor.loader.java" />
           <element id="module-output" name="frontend.java" />
           <element id="module-output" name="descriptors" />
+          <element id="module-output" name="frontend" />
         </element>
         <element id="directory" name="jps">
           <element id="artifact" artifact-name="KotlinJpsPlugin" />
