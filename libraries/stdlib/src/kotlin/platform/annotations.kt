@@ -35,3 +35,8 @@ public annotation(retention = AnnotationRetention.RUNTIME) class platformName(pu
  */
 target(FUNCTION, PROPERTY, FIELD, PROPERTY_GETTER, PROPERTY_SETTER)
 public annotation(retention = AnnotationRetention.RUNTIME) class platformStatic
+
+
+
+target(AnnotationTarget.FILE, AnnotationTarget.CLASSIFIER, AnnotationTarget.PROPERTY, AnnotationTarget.CONSTRUCTOR, AnnotationTarget.FUNCTION)
+public annotation(retention = AnnotationRetention.SOURCE) class targetPlatformName(public val name: String)

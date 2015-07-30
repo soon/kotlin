@@ -30,3 +30,8 @@ public annotation(retention = AnnotationRetention.BINARY) class jvmOverloads
  */
 target(AnnotationTarget.PROPERTY)
 public annotation(retention = AnnotationRetention.SOURCE) class publicField
+
+
+target(AnnotationTarget.FILE, AnnotationTarget.CLASSIFIER, AnnotationTarget.PROPERTY, AnnotationTarget.CONSTRUCTOR, AnnotationTarget.FUNCTION)
+public annotation(retention = AnnotationRetention.SOURCE) class jvmVersion(public val minimum: Int = 6, public val maximum: Int = 100)
+
