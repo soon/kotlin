@@ -37,6 +37,8 @@ public interface MatchGroupCollection : Collection<MatchGroup?> {
      */
     public fun get(index: Int): MatchGroup?
 
+    kotlin.jvm.jvmVersion(minimum = 7)
+    public fun get(name: String): MatchGroup?
     // TODO: Provide get(name: String) on JVM 7+
 }
 

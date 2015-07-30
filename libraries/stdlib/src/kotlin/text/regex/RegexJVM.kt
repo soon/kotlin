@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:jvmVersion()
 
 package kotlin.text
 
 import java.util.regex.Pattern
 import java.util.regex.Matcher
+import kotlin.platform.targetPlatformName
 
 private interface FlagEnum {
     public val value: Int
@@ -242,6 +244,22 @@ private fun Matcher.findNext(from: Int): MatchResult? {
                 else
                     null
             }
+
+            jvmVersion(minimum = 7)
+            override fun get(name: String): MatchGroup? = getImpl(name)
+
+            jvmVersion(minimum = 7, maximum = 7)
+            targetPlatformName("getImpl")
+            fun getImpl_jvm7(name: String): MatchGroup? {
+                TODO()
+                return getImpl_jvm7(name)
+            }
+
+            jvmVersion(minimum = 8)
+            fun getImpl(name: String): MatchGroup? {
+                TODO()
+            }
+
         }
 
 
