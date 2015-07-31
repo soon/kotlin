@@ -7601,6 +7601,12 @@ public class IntentionTestGenerated extends AbstractIntentionTest {
             doTest(fileName);
         }
 
+        @TestMetadata("propertyTypeIsMoreSpecific.kt")
+        public void testPropertyTypeIsMoreSpecific() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/testData/intentions/usePropertyAccessSyntax/propertyTypeIsMoreSpecific.kt");
+            doTest(fileName);
+        }
+
         @TestMetadata("set.kt")
         public void testSet() throws Exception {
             String fileName = JetTestUtils.navigationMetadata("idea/testData/intentions/usePropertyAccessSyntax/set.kt");
@@ -7628,6 +7634,12 @@ public class IntentionTestGenerated extends AbstractIntentionTest {
         @TestMetadata("superCall.kt")
         public void testSuperCall() throws Exception {
             String fileName = JetTestUtils.navigationMetadata("idea/testData/intentions/usePropertyAccessSyntax/superCall.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("typeParameterReceiver.kt")
+        public void testTypeParameterReceiver() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("idea/testData/intentions/usePropertyAccessSyntax/typeParameterReceiver.kt");
             doTest(fileName);
         }
     }
