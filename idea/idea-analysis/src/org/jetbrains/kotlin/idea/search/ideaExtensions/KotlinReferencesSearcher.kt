@@ -71,7 +71,7 @@ public class KotlinReferencesSearcher : QueryExecutorBase<PsiReference, Referenc
         var namedArgsScope = function.useScope.intersectWith(queryParameters.scopeDeterminedByUser)
 
         if (namedArgsScope is GlobalSearchScope) {
-            namedArgsScope = JetSourceFilterScope.kotlinSources(namedArgsScope, project)
+            namedArgsScope = JetSourceFilterScope.kotlinSourcesAndLibraries(namedArgsScope, project)
 
             val filesWithFunctionName = CacheManager.SERVICE.getInstance(project).getVirtualFilesWithWord(
                     function.name!!, UsageSearchContext.IN_CODE, namedArgsScope, true)
