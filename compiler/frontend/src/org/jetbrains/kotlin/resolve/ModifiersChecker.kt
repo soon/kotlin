@@ -91,18 +91,16 @@ public object ModifierCheckerCore {
 
     init {
         // Variance: in + out are incompatible
-        mutualListRegister(Compatibility.INCOMPATIBLE, listOf(IN_KEYWORD, OUT_KEYWORD))
+        incompatibilityRegister(listOf(IN_KEYWORD, OUT_KEYWORD))
         // Abstract + open + final + sealed: incompatible
-        mutualListRegister(Compatibility.INCOMPATIBLE, listOf(ABSTRACT_KEYWORD, OPEN_KEYWORD, FINAL_KEYWORD, SEALED_KEYWORD))
+        incompatibilityRegister(listOf(ABSTRACT_KEYWORD, OPEN_KEYWORD, FINAL_KEYWORD, SEALED_KEYWORD))
         // open is redundant to abstract & override
         redundantRegister(ABSTRACT_KEYWORD, OPEN_KEYWORD)
         redundantRegister(OVERRIDE_KEYWORD, OPEN_KEYWORD)
         // abstract is redundant to sealed
         redundantRegister(SEALED_KEYWORD, ABSTRACT_KEYWORD)
         // Visibilities: incompatible
-        mutualListRegister(
-                Compatibility.INCOMPATIBLE,
-                listOf(PRIVATE_KEYWORD, PROTECTED_KEYWORD, PUBLIC_KEYWORD, INTERNAL_KEYWORD))
+        incompatibilityRegister(listOf(PRIVATE_KEYWORD, PROTECTED_KEYWORD, PUBLIC_KEYWORD, INTERNAL_KEYWORD))
     }
 
     private fun redundantRegister(sufficient: JetModifierKeywordToken, redundant: JetModifierKeywordToken) {
@@ -110,22 +108,22 @@ public object ModifierCheckerCore {
         mutualCompatibility[Pair(redundant, sufficient)] = Compatibility.REVERSE_REDUNDANT
     }
 
-    private fun mutualListRegister(compatibility: Compatibility, list: List<JetModifierKeywordToken>) {
+    private fun incompatibilityRegister(list: List<JetModifierKeywordToken>) {
         for (first in list) {
             for (second in list) {
                 if (first != second) {
-                    mutualCompatibility[Pair(first, second)] = compatibility
+                    mutualCompatibility[Pair(first, second)] = Compatibility.INCOMPATIBLE
                 }
             }
         }
     }
 
-    private fun compatibility(modifier: JetModifierKeywordToken, keyword: JetModifierKeywordToken): Compatibility {
-        if (modifier == keyword) {
+    private fun compatibility(first: JetModifierKeywordToken, second: JetModifierKeywordToken): Compatibility {
+        if (first == second) {
             return Compatibility.REPEATED
         }
         else {
-            return mutualCompatibility[Pair(modifier, keyword)] ?: Compatibility.COMPATIBLE
+            return mutualCompatibility[Pair(first, second)] ?: Compatibility.COMPATIBLE
         }
     }
 
