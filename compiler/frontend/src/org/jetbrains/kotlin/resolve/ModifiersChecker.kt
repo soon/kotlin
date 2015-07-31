@@ -54,7 +54,7 @@ public object ModifierCheckerCore {
             OUT_KEYWORD       to EnumSet.of(TYPE_PARAMETER, TYPE_PROJECTION),
             REIFIED_KEYWORD   to EnumSet.of(TYPE_PARAMETER),
             VARARG_KEYWORD    to EnumSet.of(VALUE_PARAMETER, PROPERTY_PARAMETER),
-            DYNAMIC_KEYWORD   to emptySet(), // ??? not really a modifier ???
+            DYNAMIC_KEYWORD   to emptySet(), // not really a modifier
             COMPANION_KEYWORD to EnumSet.of(OBJECT)
     )
 
@@ -66,22 +66,9 @@ public object ModifierCheckerCore {
     )
 
     private val possibleParentTargetMap = mapOf<JetModifierKeywordToken, Set<KotlinTarget>>(
-            ENUM_KEYWORD      to KotlinTarget.ALL_TARGET_SET,
-            ABSTRACT_KEYWORD  to KotlinTarget.ALL_TARGET_SET,
-            OPEN_KEYWORD      to KotlinTarget.ALL_TARGET_SET,
-            FINAL_KEYWORD     to KotlinTarget.ALL_TARGET_SET,
-            SEALED_KEYWORD    to KotlinTarget.ALL_TARGET_SET,
             INNER_KEYWORD     to EnumSet.of(CLASS, INNER_CLASS, LOCAL_CLASS, ENUM_CLASS, ENUM_ENTRY),
             OVERRIDE_KEYWORD  to EnumSet.of(CLASSIFIER, ENUM_ENTRY),
-            PRIVATE_KEYWORD   to KotlinTarget.ALL_TARGET_SET,
-            PUBLIC_KEYWORD    to KotlinTarget.ALL_TARGET_SET,
-            INTERNAL_KEYWORD  to KotlinTarget.ALL_TARGET_SET,
             PROTECTED_KEYWORD to EnumSet.of(CLASSIFIER, ENUM_ENTRY),
-            IN_KEYWORD        to KotlinTarget.ALL_TARGET_SET,
-            OUT_KEYWORD       to KotlinTarget.ALL_TARGET_SET,
-            REIFIED_KEYWORD   to KotlinTarget.ALL_TARGET_SET,
-            VARARG_KEYWORD    to KotlinTarget.ALL_TARGET_SET,
-            DYNAMIC_KEYWORD   to KotlinTarget.ALL_TARGET_SET,
             COMPANION_KEYWORD to EnumSet.of(CLASS, ENUM_CLASS, INTERFACE)
     )
 
@@ -178,7 +165,7 @@ public object ModifierCheckerCore {
             is FunctionDescriptor -> listOf(FUNCTION)
             else -> listOf()
         }
-        val possibleParents = possibleParentTargetMap[modifier] ?: emptySet()
+        val possibleParents = possibleParentTargetMap[modifier] ?: return true
         if (possibleParents == KotlinTarget.ALL_TARGET_SET) return true
         if (actualParents.any { it in possibleParents }) return true
         trace.report(Errors.WRONG_MODIFIER_PARENT.on(node.psi, modifier, actualParents.firstOrNull()?.description ?: "this scope"))
