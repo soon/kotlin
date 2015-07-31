@@ -38,11 +38,11 @@ fun main(args: Array<String>) {
     val jetPsiFactory = JetPsiFactory(project)
     val fileType = JetFileType.INSTANCE
 
-    val evaluator = JvmPlatformEvaluator(version = 7)
-    //val evaluator = JsPlatformEvaluator()
+    val evaluators = listOf(JvmPlatformEvaluator(version = 7), JsPlatformEvaluator())
 
 
-    println("Using condition evaluator: $evaluator")
+
+    println("Using condition evaluator: $evaluators")
 
     (FileTreeWalk(sourcePath) as Sequence<File>)
             .filter { it.isFile && it.extension == fileType.defaultExtension }
@@ -51,62 +51,77 @@ fun main(args: Array<String>) {
                 val psiFile = jetPsiFactory.createFile(sourceFile.name, sourceText)
                 println("$psiFile")
 
-                val visitor = EvaluatorVisitor(evaluator)
+                val visitor = CollectModificationsVisitor(evaluators)
                 psiFile.accept(visitor)
+                val modifications = visitor.elementModifications
 
-                var prevIndex = 0
-                val resultText = StringBuilder()
-                for ((range, selector) in visitor.elementModifications) {
-                    resultText.append(sourceText, prevIndex, range.startOffset)
-                    val rangeText = range.substring(sourceText)
-                    val newValue = selector(rangeText)
-                    if (newValue.isEmpty()) {
-                        resultText.append("/* Not available on ${visitor.evaluator} */")
-                        repeat(StringUtil.getLineBreakCount(rangeText)) {
-                            resultText.append("\n")
-                        }
+                for ((evaluator, list) in modifications) {
+                    if (list.isNotEmpty()) {
+                        val resultText = applyModifications(list, sourceText, evaluator)
+                        println("Version of $sourceFile for $evaluator")
+                        println(resultText)
                     }
-                    else {
-                        resultText.append(newValue)
-                    }
-                    prevIndex = range.endOffset
                 }
-                resultText.append(sourceText, prevIndex, sourceText.length())
-
-                println(resultText.toString())
-                //processDeclaration("/", psiFile, evaluator)
             }
 }
 
+private fun applyModifications(modifications: List<Modification>, sourceText: String, evaluator: Evaluator): String {
+    var prevIndex = 0
+    val result = StringBuilder()
+    for ((range, selector) in modifications) {
+        result.append(sourceText, prevIndex, range.startOffset)
+        val rangeText = range.substring(sourceText)
+        val newValue = selector(rangeText)
+        if (newValue.isEmpty()) {
+            result.append("/* Not available on $evaluator */")
+            repeat(StringUtil.getLineBreakCount(rangeText)) {
+                result.append("\n")
+            }
+        }
+        else {
+            result.append(newValue)
+        }
+        prevIndex = range.endOffset
+    }
+    result.append(sourceText, prevIndex, sourceText.length())
+    val resultT = result.toString()
+    return resultT
+}
 
-class EvaluatorVisitor(val evaluator: Evaluator) : JetTreeVisitorVoid() {
 
-    val elementModifications: MutableList<Pair<TextRange, (String) -> String>> = arrayListOf()
+data class Modification(val range: TextRange, val selector: (String) -> String)
 
+class CollectModificationsVisitor(evaluators: List<Evaluator>) : JetTreeVisitorVoid() {
+
+    val elementModifications: Map<Evaluator, MutableList<Modification>> =
+            evaluators.toMap(selector = { it }, transform = { arrayListOf<Modification>() })
 
     override fun visitDeclaration(declaration: JetDeclaration) {
         super.visitDeclaration(declaration)
 
         val annotations = declaration.parseConditionalAnnotations()
         val name = (declaration as? JetNamedDeclaration)?.nameAsSafeName ?: declaration.name
-        val conditionalResult = evaluator(annotations)
-        println("declaration: ${declaration.javaClass.simpleName} $name, annotations: ${annotations.joinToString { it.toString() }}, evaluation result: $conditionalResult")
-        if (!conditionalResult)
-            elementModifications.add(declaration.textRange to {it -> ""})
-        else {
-            val targetName = annotations.filterIsInstance<Conditional.TargetName>().singleOrNull()
-            if (targetName != null) {
-                val placeholderName = (declaration as JetNamedDeclaration).nameAsName!!.asString()
-                val realName = targetName.name
-                elementModifications.add(declaration.textRange to { it -> it.replace(placeholderName, realName) })
+
+        val declResults = arrayListOf<Pair<Evaluator, Boolean>>()
+        for ((evaluator, modifications) in elementModifications) {
+            val conditionalResult = evaluator(annotations)
+            declResults.add(evaluator to conditionalResult)
+
+            if (!conditionalResult)
+                modifications.add(Modification(declaration.textRange) {""})
+            else {
+                val targetName = annotations.filterIsInstance<Conditional.TargetName>().singleOrNull()
+                if (targetName != null) {
+                    val placeholderName = (declaration as JetNamedDeclaration).nameAsName!!.asString()
+                    val realName = targetName.name
+                    modifications.add(Modification(declaration.textRange) { it.replace(placeholderName, realName) })
+                }
             }
+
         }
+        println("declaration: ${declaration.javaClass.simpleName} $name${if (annotations.isNotEmpty()) ", annotations: ${annotations.joinToString { it.toString() }}, evaluation result: $declResults" else ""}")
     }
 }
-
-
-val JetAnnotationEntry.typeReferenceName: String? get() =
-        (typeReference?.typeElement as? JetUserType)?.referencedName
 
 fun String.convertLineSeparators(): String = StringUtil.convertLineSeparators(this)
 
