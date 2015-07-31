@@ -18,18 +18,22 @@ package org.jetbrains.kotlin.preprocessor
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.idea.JetFileType
 import org.jetbrains.kotlin.psi.*
 import java.io.File
+import java.io.IOException
 
 
 fun main(args: Array<String>) {
     require(args.size() == 1, "Please specify path to sources")
 
     val sourcePath = File(args.first())
+
+    processRecursive(sourcePath, File("libraries/stdlib/target/jvm6"))
 
     val configuration = CompilerConfiguration()
     val environment = KotlinCoreEnvironment.createForProduction(Disposable {  }, configuration, emptyList())
@@ -44,7 +48,7 @@ fun main(args: Array<String>) {
 
     println("Using condition evaluator: $evaluators")
 
-    (FileTreeWalk(sourcePath) as Sequence<File>)
+    (sourcePath.walk() as Sequence<File>)
             .filter { it.isFile && it.extension == fileType.defaultExtension }
             .forEach { sourceFile ->
                 val sourceText = sourceFile.readText().convertLineSeparators()
@@ -84,8 +88,7 @@ private fun applyModifications(modifications: List<Modification>, sourceText: St
         prevIndex = range.endOffset
     }
     result.append(sourceText, prevIndex, sourceText.length())
-    val resultT = result.toString()
-    return resultT
+    return result.toString()
 }
 
 
@@ -123,7 +126,97 @@ class CollectModificationsVisitor(evaluators: List<Evaluator>) : JetTreeVisitorV
     }
 }
 
+
+data class Profile(val name: String, val evaluator: Evaluator, val targetRoot: File)
+
+
+public class Preprocessor {
+
+    val fileType = JetFileType.INSTANCE
+
+
+    sealed class FileProcessingResult {
+        object Skip : FileProcessingResult()
+        object Copy : FileProcessingResult()
+
+        class Modify(val resultText: String) : FileProcessingResult()
+    }
+
+//    private fun processFile(sourceFile: File, evaluator: Evaluator): FileProcessingResult {
+//        if (sourceFile.extension != fileType.defaultExtension)
+//            return FileProcessingResult.Copy
+//
+//        val sourceText = sourceFile.readText().convertLineSeparators()
+//        val psiFile = jetPsiFactory.createFile(sourceFile.name, sourceText)
+//        println("$psiFile")
+//
+//
+//    }
+}
+
+private fun processDirectory(sourceRoot: File, targetRelativeRoot: File, profiles: List<Profile>) {
+
+    val (sourceFiles, sourceDirectories) = sourceRoot.listFiles().partition { !it.isDirectory }
+
+    // TODO: keep processed file list for each profile
+}
+
+private fun processRecursive(sourceRoot: File, targetRoot: File) {
+    val (sourceFiles, sourceDirectories) = sourceRoot.listFiles().partition { !it.isDirectory }
+
+    val processedFiles = hashSetOf<File>()
+    for (sourceFile in sourceFiles)
+    {
+        // TODO: only if .kt
+        val resultText = processFileText(sourceFile)
+
+        // if (keepFile)
+
+        val destFile = sourceFile.makeRelativeTo(sourceRoot, targetRoot)
+        // if no modifications — copy
+
+        processedFiles += destFile
+
+        if (destFile.exists()) {
+            if (destFile.isDirectory)
+                destFile.deleteRecursively()
+            else
+                if (destFile.isTextEqualTo(resultText))
+                    continue
+        }
+        destFile.writeText(resultText)
+    }
+
+    for (sourceDir in sourceDirectories) {
+        val destDir = sourceDir.makeRelativeTo(sourceRoot, targetRoot)
+        if (!destDir.exists()) {
+            destDir.mkdirsOrFail()
+        }
+        else if (!destDir.isDirectory) {
+            destDir.delete()
+        }
+        processRecursive(sourceDir, destDir)
+        processedFiles += destDir
+    }
+
+    targetRoot.listFiles().forEach { targetFile ->
+        if (!processedFiles.remove(processedFiles.find { FileUtil.filesEqual(it, targetFile) })) {
+            targetFile.deleteRecursively()
+        }
+    }
+}
+
+private fun processFileText(sourceFile: File): String = sourceFile.readText()
+
 fun String.convertLineSeparators(): String = StringUtil.convertLineSeparators(this)
 
 
+fun File.isTextEqualTo(content: String): Boolean = readText().lines() == content.lines()
 
+fun File.makeRelativeTo(from: File, to: File) = File(to, relativeTo(from))
+
+fun File.mkdirsOrFail() {
+    if (!mkdirs() && !exists()) {
+        throw IOException("Failed to create directory $this.")
+    }
+}
