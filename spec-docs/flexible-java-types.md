@@ -69,7 +69,8 @@ k(int[]) = IntArray
 Raw Java types (see https://docs.oracle.com/javase/specs/jls/se8/html/jls-4.html#jls-4.8 for clarification) are loaded as usual flexible types with special arguments projections.
 
 ```
-Raw(G<T1>..F<T2>) = (G<ErasedUpperBound(T1)>..F<out ErasedUpperBound(T2)>)
+Raw(G<T1>..F<T2>) = (G<ErasedUpperBound(T1)>..F<out ErasedUpperBound(T2)>) // T1 and T2 have invariant or `out` variance
+Raw(G<T1>..F<T2>) = (G<ErasedUpperBound(T1)>..F<Nothing>) // T1 and T2 have `in` variance
 ```
 
 where `G<T1>..F<T2>` is initially loaded flexible type with yet unsubstituted type parameters.

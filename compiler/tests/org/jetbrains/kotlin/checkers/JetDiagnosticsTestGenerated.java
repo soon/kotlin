@@ -10616,6 +10616,12 @@ public class JetDiagnosticsTestGenerated extends AbstractJetDiagnosticsTest {
                     doTest(fileName);
                 }
 
+                @TestMetadata("rawWithInProjection.kt")
+                public void testRawWithInProjection() throws Exception {
+                    String fileName = JetTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/platformTypes/rawTypes/rawWithInProjection.kt");
+                    doTest(fileName);
+                }
+
                 @TestMetadata("recursiveBound.kt")
                 public void testRecursiveBound() throws Exception {
                     String fileName = JetTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/platformTypes/rawTypes/recursiveBound.kt");
